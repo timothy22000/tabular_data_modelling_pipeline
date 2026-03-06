@@ -1,3 +1,0 @@
-model,gini_train,gini_test,mae,rmse,cv_rmse,ae_ratio,gamma_deviance,n_params,training_time
-localglmnet,0.3073,0.3296,516.59,1216.87,1.1673,1.0441,-2295.509723,18510,95.3
-stacked_ensemble,0.3072,0.3295,512.43,1218.03,1.1684,1.0591,-2297.485617,2,0.0

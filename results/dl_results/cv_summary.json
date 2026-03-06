@@ -1,9 +1,0 @@
-{
-  "gini_val_mean": 0.33108,
-  "gini_val_std": 0.003830404678359715,
-  "gini_train_mean": 0.35286,
-  "mae_mean": 407.096,
-  "ae_ratio_mean": 1.0239600000000002,
-  "oof_gini": 0.33116988283152893,
-  "n_folds": 5
-}
