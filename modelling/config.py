@@ -91,40 +91,32 @@ except ImportError:
     HAS_TABM = False
 
 # ---------------------------------------------------------------------------
-# Imports from the GLM pipeline
+# Generic utilities (extracted from GLM/GBM scripts)
 # ---------------------------------------------------------------------------
-from build_glm import (
-    BASE_LEVELS,
-    CATEGORICAL_FACTORS,
-    GLMConfig,
-    align_test_matrix,
-    cap_premium,
-    compute_gini,
-    consolidate_categoricals,
+from .utils.glm import (
+    StatsmodelsResult,
+    SklearnResult,
     fit_gamma_glm,
-    load_data,
     prepare_design_matrix,
+    align_test_matrix,
+)
+from .utils.metrics import (
+    compute_gini,
+    compute_gamma_deviance,
+    compute_metrics as _compute_metrics,
+    lorenz_curve as _lorenz_curve,
+    compute_decile_analysis,
+    clamp_predictions as _clamp_predictions,
+)
+from .utils.preprocessing import (
+    cap_target,
+    load_csv_with_split,
 )
 
 # ---------------------------------------------------------------------------
-# Imports from the GBM pipeline
+# Dataset configuration
 # ---------------------------------------------------------------------------
-from build_gbm import (
-    DERIVED_CONTINUOUS,
-    GLM_HYBRID_FACTORS,
-    MONOTONE_CONSTRAINTS,
-    NATIVE_CATEGORICALS,
-    PARSIMONIOUS_FEATURES,
-    RAW_CONTINUOUS,
-    GBMConfig,
-    _clamp_predictions,
-    _compute_metrics,
-    _lorenz_curve,
-    compute_decile_analysis,
-    compute_gamma_deviance,
-    load_and_prepare_data,
-    prepare_gbm_features,
-)
+from dataset_config import DatasetConfig
 
 # ---------------------------------------------------------------------------
 # Logging
@@ -157,32 +149,31 @@ class DLConfig:
     """Configuration for the deep learning and advanced modelling pipeline.
 
     Attributes:
-        input_path: Path to the GLM-ready CSV file.
+        input_path: Path to the input CSV file.
         output_dir: Directory for output artefacts.
-        seed: Master random seed for reproducibility across all frameworks.
-        cap_percentile: Premium winsorisation percentile (0-100).
-        cap_value: Hard premium cap override in GBP (None = use percentile).
+        dataset: DatasetConfig describing the dataset schema.
+        seed: Master random seed for reproducibility.
+        cap_percentile: Target winsorisation percentile (0-100).
+        cap_value: Hard cap override (None = use percentile).
         n_tuning_trials: Number of Optuna trials per architecture.
-        cv_folds: Number of cross-validation folds for GBM tuning.
-        quick: Subsample 1000 training rows and reduce epochs for rapid
-            iteration. Sets n_ensemble=1, catboost_iterations=200, epochs=50.
-        skip_tuning: Skip Optuna tuning and use architecture defaults.
+        cv_folds: Number of cross-validation folds.
+        quick: Subsample 1000 training rows and reduce epochs.
+        skip_tuning: Skip Optuna tuning and use defaults.
         skip_interpretability: Skip Captum attribution computation.
-        architectures: List of architectures to train. Valid values are
-            "catboost", "xgboost", "cann", "cann_gbm", "ft_transformer",
-            "tabm", "localglmnet", "drn".
+        architectures: List of architectures to train.
         epochs: Maximum training epochs for DL models.
-        patience: Early stopping patience (epochs without val improvement).
+        patience: Early stopping patience.
         batch_size: Mini-batch size for DL training.
         device: Compute device — "auto" detects MPS > CUDA > CPU.
-        val_fraction: Fraction of training data held out for DL validation.
-        n_ensemble: Number of seed-varied DL models to average per architecture.
+        val_fraction: Fraction of training data for validation.
+        n_ensemble: Number of seed-varied models per architecture.
         catboost_iterations: Maximum boosting rounds for CatBoost.
-        mono_lambda: Weight of monotonicity penalty in DL training loss.
+        mono_lambda: Weight of monotonicity penalty in DL loss.
     """
 
-    input_path: str = "data_to_be_cleaned/net/net_glm_ready.csv"
-    output_dir: str = "data_to_be_cleaned/net/dl_results"
+    input_path: str = "data/net_glm_ready.csv"
+    output_dir: str = "results/dl_results"
+    dataset: DatasetConfig = field(default_factory=DatasetConfig)
     seed: int = 42
     cap_percentile: float = 99.5
     cap_value: Optional[float] = None
@@ -215,6 +206,27 @@ class DLConfig:
 # ---------------------------------------------------------------------------
 
 
+def _load_dataset_config(config_path: str) -> DatasetConfig:
+    """Load a DatasetConfig from a Python config file.
+
+    The config file must define a module-level ``config`` variable
+    of type DatasetConfig.
+    """
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location("dataset_cfg", config_path)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+
+    if not hasattr(mod, "config"):
+        raise ValueError(f"Config file {config_path} must define a 'config' variable")
+    cfg = mod.config
+    if not isinstance(cfg, DatasetConfig):
+        raise TypeError(f"'config' in {config_path} must be a DatasetConfig, got {type(cfg)}")
+    cfg.validate()
+    return cfg
+
+
 def parse_args() -> DLConfig:
     """Parse command-line arguments and return a DLConfig.
 
@@ -223,31 +235,36 @@ def parse_args() -> DLConfig:
     """
     parser = argparse.ArgumentParser(
         description=(
-            "Deep learning & advanced modelling pipeline for UK motor net premium: "
+            "Tabular data modelling pipeline with 8 architectures: "
             "CatBoost, XGBoost, CANN, CANN-GBM, FT-Transformer, TabM, LocalGLMnet, DRN."
         ),
     )
     parser.add_argument(
+        "--config",
+        default=None,
+        help="Path to dataset config file (e.g. configs/net_premium.py)",
+    )
+    parser.add_argument(
         "--input",
-        default="data_to_be_cleaned/net/net_glm_ready.csv",
-        help="Path to GLM-ready CSV (default: data_to_be_cleaned/net/net_glm_ready.csv)",
+        default="data/net_glm_ready.csv",
+        help="Path to input CSV (default: data/net_glm_ready.csv)",
     )
     parser.add_argument(
         "--output-dir",
-        default="data_to_be_cleaned/net/dl_results",
-        help="Output directory for artefacts (default: data_to_be_cleaned/net/dl_results)",
+        default="results/dl_results",
+        help="Output directory for artefacts (default: results/dl_results)",
     )
     parser.add_argument(
         "--cap",
         type=float,
         default=None,
-        help="Hard premium cap in GBP (default: use percentile)",
+        help="Hard target cap (default: use percentile)",
     )
     parser.add_argument(
         "--cap-percentile",
         type=float,
         default=99.5,
-        help="Percentile for premium cap (default: 99.5)",
+        help="Percentile for target cap (default: 99.5)",
     )
     parser.add_argument(
         "--seed",
@@ -340,12 +357,25 @@ def parse_args() -> DLConfig:
 
     args = parser.parse_args()
 
+    # Load dataset config if provided, otherwise auto-detect later
+    if args.config:
+        dataset = _load_dataset_config(args.config)
+    else:
+        dataset = DatasetConfig()
+
+    # Override cap settings from CLI if provided
+    if args.cap is not None:
+        dataset.cap_value = args.cap
+    if args.cap_percentile != 99.5:
+        dataset.cap_percentile = args.cap_percentile
+
     return DLConfig(
         input_path=args.input,
         output_dir=args.output_dir,
+        dataset=dataset,
         seed=args.seed,
-        cap_percentile=args.cap_percentile,
-        cap_value=args.cap,
+        cap_percentile=dataset.cap_percentile,
+        cap_value=dataset.cap_value,
         n_tuning_trials=args.n_trials,
         cv_folds=args.cv_folds,
         quick=args.quick,

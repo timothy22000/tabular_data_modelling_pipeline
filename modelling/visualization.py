@@ -12,7 +12,7 @@ from .config import (
     HAS_TORCH, HAS_MATPLOTLIB,
     torch, log,
     C_PRIMARY, C_ACCENT, C_GREEN, C_GOLD, C_RED, C_PURPLE, C_TEAL,
-    MONOTONE_CONSTRAINTS, _lorenz_curve, compute_decile_analysis,
+    _lorenz_curve, compute_decile_analysis,
 )
 from .data import DLFeatureBundle
 from .evaluation import _count_model_params
@@ -172,7 +172,7 @@ def generate_dl_visualizations(
                 pass
 
         ax.set_xlabel("Cumulative Share of Policies")
-        ax.set_ylabel("Cumulative Share of Premium")
+        ax.set_ylabel("Cumulative Share of Target")
         ax.set_title("Lorenz Curves — All Models", fontweight="bold")
         ax.legend(fontsize=8, loc="upper left")
         fig.tight_layout()
@@ -380,7 +380,7 @@ def generate_dl_visualizations(
                             transform=ax.transAxes)
                 ax.set_title(mname, fontsize=9, fontweight="bold")
                 ax.set_xlabel("Decile")
-                ax.set_ylabel("Mean Premium")
+                ax.set_ylabel("Mean Target")
                 ax.legend(fontsize=7)
 
             # Hide unused subplots
@@ -436,8 +436,8 @@ def generate_dl_visualizations(
                 except Exception:
                     pass
                 ax.set_title(mname, fontsize=9, fontweight="bold")
-                ax.set_xlabel("Actual Premium")
-                ax.set_ylabel("Predicted Premium")
+                ax.set_xlabel("Actual")
+                ax.set_ylabel("Predicted")
                 ax.legend(fontsize=7)
 
             for mi in range(n_models_9, nrows_9 * ncols_9):
@@ -513,7 +513,7 @@ def generate_dl_visualizations(
                 ax.boxplot(std_by_decile, patch_artist=True,
                            boxprops=dict(facecolor=_family_color(arch), alpha=0.6))
                 ax.set_title(f"{arch}\nPrediction Std by Decile", fontsize=9)
-                ax.set_xlabel("Premium Decile")
+                ax.set_xlabel("Prediction Decile")
                 ax.set_ylabel("Prediction Std (£)")
 
             fig.suptitle("Ensemble Member Prediction Variance", fontweight="bold")
@@ -646,7 +646,7 @@ def generate_dl_visualizations(
     try:
         log.info("  Figure 13: Monotonicity check")
         mono_feats = [
-            f for f in MONOTONE_CONSTRAINTS
+            f for f in config.dataset.monotone_constraints
             if f in bundle.continuous_feature_names
         ][:5]
 
@@ -660,7 +660,7 @@ def generate_dl_visualizations(
             for fi, feat in enumerate(mono_feats):
                 ax = axes[fi][0]
                 feat_idx = bundle.continuous_feature_names.index(feat)
-                direction = MONOTONE_CONSTRAINTS[feat]
+                direction = config.dataset.monotone_constraints[feat]
 
                 feat_vals = bundle.X_test_cont[:, feat_idx]
                 bins = np.percentile(feat_vals, np.linspace(0, 100, n_bins + 1))
@@ -679,7 +679,7 @@ def generate_dl_visualizations(
                 arrow = "↑" if direction > 0 else "↓"
                 ax.set_title(f"{feat}  (expected: {arrow})", fontsize=9, fontweight="bold")
                 ax.set_xlabel("Feature value (std)")
-                ax.set_ylabel("Mean predicted premium (£)")
+                ax.set_ylabel("Mean prediction")
                 ax.legend(fontsize=7)
 
             fig.suptitle("Monotonicity Compliance Check", fontweight="bold")
@@ -830,7 +830,7 @@ def generate_dl_visualizations(
         ax2.set_title("Lorenz Curves", fontweight="bold")
         ax2.legend(fontsize=6, loc="upper left")
         ax2.set_xlabel("Cumulative policies")
-        ax2.set_ylabel("Cumulative premium")
+        ax2.set_ylabel("Cumulative target")
 
         # Panel 3: Best model calibration (top-right)
         ax3 = fig.add_subplot(2, 3, 3)

@@ -66,12 +66,14 @@ if HAS_TORCH:
             dropout: float = 0.2,
             kl_alpha: float = 0.1,
             base_dispersion: float = 1.0,
+            prediction_floor: float = 1.0,
         ) -> None:
             super().__init__()
             if hidden_dims is None:
                 hidden_dims = [128, 64]
 
             self.kl_alpha = kl_alpha
+            self.prediction_floor = prediction_floor
 
             # Pre-compute base_shape from the dispersion parameter and register
             # as a non-trainable buffer so it moves with the model to the correct
@@ -137,8 +139,8 @@ if HAS_TORCH:
             # Refined shape: base_shape shifted by the network's delta
             shape_refined = torch.exp(torch.log(self.base_shape) + delta_log_shape)
 
-            # Base rate derived from GLM mean; glm_pred clamped to >= 1 GBP
-            base_rate = self.base_shape / glm_pred.clamp(min=1.0)
+            # Base rate derived from GLM mean; glm_pred clamped to floor
+            base_rate = self.base_shape / glm_pred.clamp(min=self.prediction_floor)
 
             # Refined rate: base_rate shifted by the network's delta
             rate_refined = torch.exp(torch.log(base_rate) + delta_log_rate)

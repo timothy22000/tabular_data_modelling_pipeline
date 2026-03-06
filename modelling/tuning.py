@@ -10,7 +10,7 @@ from .config import (
     DLConfig,
     HAS_TORCH, HAS_CATBOOST, HAS_XGBOOST, HAS_OPTUNA,
     torch, optuna, xgb, CatBoostRegressor,
-    log, MONOTONE_CONSTRAINTS, _clamp_predictions,
+    log, _clamp_predictions,
 )
 from .data import DLFeatureBundle, build_dataloaders
 from .models import get_default_dl_params, build_dl_model
@@ -155,7 +155,7 @@ def tune_xgboost(
     )
     cont_names = bundle.continuous_feature_names
     all_feature_names = cont_names + bundle.categorical_feature_names
-    mono_tuple = tuple(MONOTONE_CONSTRAINTS.get(f, 0) for f in all_feature_names)
+    mono_tuple = tuple(config.dataset.monotone_constraints.get(f, 0) for f in all_feature_names)
 
     def objective(trial: "optuna.Trial") -> float:
         """Optuna objective: RMSE on test set."""
@@ -287,7 +287,7 @@ def tune_dl_model(
     def objective(trial: "optuna.Trial") -> float:
         """Optuna objective: val Gamma deviance after short training."""
         params = _suggest_dl_params(trial, architecture)
-        model = build_dl_model(architecture, params, bundle)
+        model = build_dl_model(architecture, params, bundle, config.dataset.prediction_floor)
         model = model.to(device)
 
         optimizer = torch.optim.AdamW(
@@ -296,7 +296,7 @@ def tune_dl_model(
             weight_decay=params.get("weight_decay", 1e-4),
         )
         mono_indices, mono_directions = _get_monotone_cont_indices(
-            bundle.continuous_feature_names
+            bundle.continuous_feature_names, config.dataset.monotone_constraints
         )
 
         for epoch in range(tune_epochs):

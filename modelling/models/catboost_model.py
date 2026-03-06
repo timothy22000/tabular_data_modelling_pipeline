@@ -6,7 +6,7 @@ from typing import Any, Dict, List, Optional
 
 from ..config import (
     DLConfig, HAS_CATBOOST, CatBoostRegressor,
-    np, log, time, MONOTONE_CONSTRAINTS, _clamp_predictions, _compute_metrics,
+    np, log, time, _clamp_predictions, _compute_metrics,
 )
 from ..data import DLFeatureBundle
 
@@ -25,8 +25,7 @@ def train_catboost(
     """Train a CatBoostRegressor with monotonicity constraints.
 
     Uses the CatBoost Pool objects from the bundle for efficient training.
-    Monotone constraints are applied to the five actuarially motivated
-    features (NCD_CAPPED, MILEAGE_K, VEHICLE_VALUE, CLM_NUM_L5Y, CREDIT_SCORE).
+    Monotone constraints are applied based on the dataset configuration.
     Eval set enables CatBoost's internal early stopping.
 
     Args:
@@ -58,7 +57,7 @@ def train_catboost(
     # CatBoost expects a dict {feature_name: direction} or a list aligned to all features
     all_feature_names = bundle.continuous_feature_names + bundle.categorical_feature_names
     mono_constraints: Dict[str, int] = {}
-    for feat, direction in MONOTONE_CONSTRAINTS.items():
+    for feat, direction in config.dataset.monotone_constraints.items():
         if feat in all_feature_names:
             mono_constraints[feat] = direction
 

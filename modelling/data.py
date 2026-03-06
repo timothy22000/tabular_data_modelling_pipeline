@@ -1,13 +1,7 @@
-"""Data loading and feature preparation for the DL net premium pipeline.
+"""Data loading and feature preparation for the tabular modelling pipeline.
 
 This module provides data ingestion, feature engineering, and PyTorch Dataset /
 DataLoader construction used by all DL and GBM benchmark architectures.
-
-Responsibilities:
-    - Wrapping the GBM data loader for consistent preprocessing (load_and_prepare_dl_data).
-    - Encoding and standardising features into DLFeatureBundle.
-    - Building CatBoost Pool objects and GLM base predictions for CANN.
-    - Constructing train / validation / test PyTorch DataLoaders.
 """
 
 from .config import (
@@ -16,12 +10,11 @@ from .config import (
     torch, nn, DataLoader, Dataset, random_split,
     Pool,
     np, pd, log,
-    GBMConfig, load_and_prepare_data, prepare_gbm_features,
-    RAW_CONTINUOUS, DERIVED_CONTINUOUS, NATIVE_CATEGORICALS,
-    GLM_HYBRID_FACTORS, BASE_LEVELS, MONOTONE_CONSTRAINTS,
+    DatasetConfig,
     prepare_design_matrix, align_test_matrix, fit_gamma_glm,
     compute_gini, _clamp_predictions,
 )
+from .utils.preprocessing import load_csv_with_split, cap_target
 from typing import Any, Dict, List, Optional, Tuple
 from dataclasses import dataclass
 
@@ -34,45 +27,58 @@ from dataclasses import dataclass
 def load_and_prepare_dl_data(
     config: DLConfig,
 ) -> Tuple[pd.DataFrame, pd.DataFrame, float]:
-    """Load and prepare data for the DL pipeline via the GBM loader.
-
-    Wraps ``load_and_prepare_data`` from the GBM module by constructing a
-    compatible ``GBMConfig`` adapter.  This ensures identical preprocessing
-    (cap, consolidation) across all benchmark models.
+    """Load CSV, split train/test, cap target, apply optional consolidation.
 
     Args:
-        config: DL pipeline configuration.
+        config: DL pipeline configuration (includes dataset config).
 
     Returns:
-        Tuple of (train_df, test_df, cap_value) where:
-            - train_df: Consolidated training DataFrame with AD_POLPREMIUM_CAPPED.
-            - test_df: Consolidated test DataFrame with uncapped AD_POLPREMIUM.
-            - cap_value: The numeric premium cap applied to training data.
+        Tuple of (train_df, test_df, cap_value).
     """
     log.info("=" * 72)
     log.info("SECTION 1: Data Loading")
     log.info("=" * 72)
 
-    # Build a GBMConfig that mirrors the DLConfig settings.
-    # GBMConfig fields that have no DL equivalent are left at defaults.
-    gbm_cfg = GBMConfig(
+    ds = config.dataset
+
+    # Load and split
+    train_df, test_df = load_csv_with_split(
         input_path=config.input_path,
-        output_dir=config.output_dir,
+        target_col=ds.target_col,
+        split_col=ds.split_col,
+        exclude_cols=ds.exclude_cols,
         seed=config.seed,
-        cap_percentile=config.cap_percentile,
-        cap_value=config.cap_value,
-        n_tuning_trials=config.n_tuning_trials,
-        cv_folds=config.cv_folds,
         quick=config.quick,
-        skip_shap=True,          # DL pipeline has its own interpretability
-        skip_tuning=True,        # Tuning is handled per-arch later
-        run_sensitivity=False,
     )
 
-    train_df, test_df, cap_value = load_and_prepare_data(gbm_cfg)
+    # Apply categorical consolidation if provided
+    if ds.categorical_consolidation is not None:
+        train_df = ds.categorical_consolidation(train_df)
+        test_df = ds.categorical_consolidation(test_df)
+        log.info("  Applied categorical consolidation")
+
+    # Cap target on training data
+    train_df, cap_value = cap_target(
+        train_df,
+        ds.target_col,
+        cap_percentile=ds.cap_percentile,
+        cap_value=ds.cap_value,
+    )
+
+    # Also cap test for consistent column structure
+    capped_col = f"{ds.target_col}_CAPPED"
+    test_df[capped_col] = test_df[ds.target_col].clip(upper=cap_value)
+
+    # Compute derived features
+    for feat_name, feat_fn in ds.derived_features.items():
+        try:
+            train_df[feat_name] = feat_fn(train_df)
+            test_df[feat_name] = feat_fn(test_df)
+        except Exception as exc:
+            log.warning("  Derived feature '%s' failed: %s", feat_name, exc)
 
     log.info(
-        "  Data ready — Train: %d rows | Test: %d rows | Cap: £%.2f",
+        "  Data ready — Train: %d rows | Test: %d rows | Cap: %.2f",
         len(train_df),
         len(test_df),
         cap_value,
@@ -191,39 +197,38 @@ def _build_glm_predictions(
     train_df: pd.DataFrame,
     test_df: pd.DataFrame,
     y_train: np.ndarray,
+    config: DLConfig,
 ) -> Tuple[np.ndarray, np.ndarray, float]:
     """Fit a Gamma GLM and return training predictions, test predictions, and dispersion.
 
-    Uses the 13 stepwise-selected GLM_HYBRID_FACTORS to build the design
-    matrix, aligns test columns to training columns, then fits and predicts.
-    Predictions are clamped to a floor of 1.0.
-
-    Args:
-        train_df: Consolidated training DataFrame.
-        test_df: Consolidated test DataFrame.
-        y_train: Capped training response values.
-
-    Returns:
-        Tuple of (glm_train_preds, glm_test_preds, glm_dispersion) where the
-        first two are float32 NumPy arrays and dispersion is a Python float.
+    Uses the GLM factors from DatasetConfig to build the design matrix.
     """
+    ds = config.dataset
+    floor = ds.prediction_floor
+
     log.info("  Building GLM design matrix for CANN base predictions ...")
     y_train_series = pd.Series(y_train, index=train_df.index)
 
-    X_train_glm = prepare_design_matrix(train_df, GLM_HYBRID_FACTORS, BASE_LEVELS)
-    X_test_glm = prepare_design_matrix(test_df, GLM_HYBRID_FACTORS, BASE_LEVELS)
+    # Determine which factors are categorical
+    cat_set = set(ds.categorical_features)
+
+    X_train_glm = prepare_design_matrix(
+        train_df, ds.glm_factors, ds.base_levels, categorical_factors=cat_set
+    )
+    X_test_glm = prepare_design_matrix(
+        test_df, ds.glm_factors, ds.base_levels, categorical_factors=cat_set
+    )
     X_test_glm = align_test_matrix(X_train_glm, X_test_glm)
 
     glm_result = fit_gamma_glm(X_train_glm, y_train_series)
 
     glm_train_preds = _clamp_predictions(
-        np.asarray(glm_result.predict(X_train_glm), dtype=np.float32)
+        np.asarray(glm_result.predict(X_train_glm), dtype=np.float32), floor
     )
     glm_test_preds = _clamp_predictions(
-        np.asarray(glm_result.predict(X_test_glm), dtype=np.float32)
+        np.asarray(glm_result.predict(X_test_glm), dtype=np.float32), floor
     )
 
-    # Extract GLM dispersion for DRN base distribution
     try:
         glm_dispersion = float(glm_result.scale)
     except AttributeError:
@@ -319,20 +324,23 @@ def prepare_dl_features(
     log.info("SECTION 2: Feature Preparation")
     log.info("=" * 72)
 
-    # ----- Step 1: Call GBM feature builder for base matrices ----------------
-    # prepare_gbm_features returns combined (continuous + label-encoded cat)
-    # DataFrames plus metadata.  We then separate them for DL use.
-    X_train_combined, X_test_combined, y_train_s, y_test_s, feature_names, cat_indices = (
-        prepare_gbm_features(train_df, test_df)
-    )
+    ds = config.dataset
+    target_col = ds.target_col
+    capped_col = f"{target_col}_CAPPED"
 
-    y_train = y_train_s.values.astype(np.float32)
-    y_test = y_test_s.values.astype(np.float32)
+    # ----- Step 1: Build feature matrices from DatasetConfig ------------------
+    # Extract target
+    y_train = train_df[capped_col].values.astype(np.float32)
+    y_test = test_df[target_col].values.astype(np.float32)
 
-    # Separate continuous vs categorical sub-matrices
-    all_continuous_names: List[str] = RAW_CONTINUOUS + DERIVED_CONTINUOUS
-    cont_names_present = [n for n in all_continuous_names if n in X_train_combined.columns]
-    cat_names_present = [n for n in NATIVE_CATEGORICALS if n in X_train_combined.columns]
+    # Clamp to floor
+    y_train = np.maximum(y_train, ds.prediction_floor).astype(np.float32)
+    y_test = np.maximum(y_test, ds.prediction_floor).astype(np.float32)
+
+    # Get feature names from config (with derived features included)
+    all_continuous_names = list(ds.continuous_features) + list(ds.derived_features.keys())
+    cont_names_present = [n for n in all_continuous_names if n in train_df.columns]
+    cat_names_present = [n for n in ds.categorical_features if n in train_df.columns]
 
     log.info(
         "  Feature split — %d continuous, %d categorical",
@@ -341,19 +349,17 @@ def prepare_dl_features(
     )
 
     # Raw (non-standardised) continuous arrays for CatBoost and XGBoost
-    X_train_cont_raw = X_train_combined[cont_names_present].values.astype(np.float32)
-    X_test_cont_raw = X_test_combined[cont_names_present].values.astype(np.float32)
+    X_train_cont_raw = train_df[cont_names_present].fillna(-999.0).values.astype(np.float32)
+    X_test_cont_raw = test_df[cont_names_present].fillna(-999.0).values.astype(np.float32)
 
     # Raw combined DataFrame for CatBoost (needs string categoricals)
-    X_train_raw_df = X_train_combined.copy()
-    X_test_raw_df = X_test_combined.copy()
+    X_train_raw_df = train_df[cont_names_present + cat_names_present].copy()
+    X_test_raw_df = test_df[cont_names_present + cat_names_present].copy()
 
-    # Rebuild raw categoricals as strings for CatBoost Pool
+    # Ensure categoricals are strings for CatBoost Pool
     for col in cat_names_present:
-        raw_train = train_df[col].astype(str).fillna("UNKNOWN")
-        raw_test = test_df[col].astype(str).fillna("UNKNOWN")
-        X_train_raw_df[col] = raw_train.values
-        X_test_raw_df[col] = raw_test.values
+        X_train_raw_df[col] = train_df[col].astype(str).fillna("UNKNOWN")
+        X_test_raw_df[col] = test_df[col].astype(str).fillna("UNKNOWN")
 
     # ----- Step 2: Build per-category integer encodings ----------------------
     category_mappings: Dict[str, Dict[str, int]] = {}
@@ -413,7 +419,7 @@ def prepare_dl_features(
     needs_glm = {"cann", "cann_gbm", "localglmnet", "drn"}.intersection(config.architectures)
     if needs_glm:
         glm_train_preds, glm_test_preds, glm_dispersion = _build_glm_predictions(
-            train_df, test_df, y_train
+            train_df, test_df, y_train, config
         )
     else:
         glm_train_preds = np.ones(len(y_train), dtype=np.float32)
@@ -477,15 +483,15 @@ def prepare_dl_features(
 
 if HAS_TORCH:
 
-    class PremiumDataset(Dataset):  # type: ignore[misc]
+    class TabularDataset(Dataset):  # type: ignore[misc]
         """PyTorch Dataset wrapping continuous features, categorical codes,
-        optional GLM base predictions, optional GBM predictions, and the target premium.
+        optional GLM base predictions, optional GBM predictions, and the target.
 
         Args:
             x_cont: Float32 array of standardised continuous features,
                 shape (N, F_cont).
             x_cat: Int64 array of categorical integer codes, shape (N, F_cat).
-            y: Float32 target premium array, shape (N,).
+            y: Float32 target array, shape (N,).
             glm_preds: Float32 GLM base predictions, shape (N,).
                 Defaults to a ones array when CANN is not used.
             gbm_preds: Float32 CatBoost base predictions, shape (N,).
@@ -536,11 +542,11 @@ if HAS_TORCH:
 
 else:
     # Provide a stub so module-level references don't raise NameError
-    class PremiumDataset:  # type: ignore[no-redef]
-        """Stub PremiumDataset when PyTorch is unavailable."""
+    class TabularDataset:  # type: ignore[no-redef]
+        """Stub TabularDataset when PyTorch is unavailable."""
 
         def __init__(self, *args: Any, **kwargs: Any) -> None:
-            raise ImportError("PyTorch is required for PremiumDataset.")
+            raise ImportError("PyTorch is required for TabularDataset.")
 
 
 def build_dataloaders(
@@ -570,7 +576,7 @@ def build_dataloaders(
 
     rng = torch.Generator().manual_seed(config.seed)
 
-    full_train_dataset = PremiumDataset(
+    full_train_dataset = TabularDataset(
         x_cont=bundle.X_train_cont,
         x_cat=bundle.X_train_cat,
         y=bundle.y_train,
@@ -586,7 +592,7 @@ def build_dataloaders(
         full_train_dataset, [n_train, n_val], generator=rng
     )
 
-    test_dataset = PremiumDataset(
+    test_dataset = TabularDataset(
         x_cont=bundle.X_test_cont,
         x_cat=bundle.X_test_cat,
         y=bundle.y_test,

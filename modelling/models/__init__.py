@@ -107,6 +107,7 @@ def build_dl_model(
     architecture: str,
     params: Dict[str, Any],
     bundle: DLFeatureBundle,
+    prediction_floor: float = 1.0,
 ) -> "nn.Module":
     """Factory function: instantiate a DL model from architecture name and params.
 
@@ -188,6 +189,7 @@ def build_dl_model(
             dropout=params.get("dropout", 0.2),
             kl_alpha=params.get("kl_alpha", 0.1),
             base_dispersion=getattr(bundle, "glm_dispersion", 1.0),
+            prediction_floor=prediction_floor,
         )
 
     else:

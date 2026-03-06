@@ -11,7 +11,7 @@ import pandas as pd
 from .config import (
     DLConfig,
     HAS_CATBOOST, CatBoostRegressor, Pool,
-    log, MONOTONE_CONSTRAINTS, _clamp_predictions, _compute_metrics, compute_gini,
+    log, _clamp_predictions, _compute_metrics, compute_gini,
 )
 from .data import DLFeatureBundle
 from .models import get_default_dl_params
@@ -78,7 +78,7 @@ def run_cross_validation(
     all_feature_names = bundle.continuous_feature_names + bundle.categorical_feature_names
     mono_constraints: Dict[str, int] = {
         feat: direction
-        for feat, direction in MONOTONE_CONSTRAINTS.items()
+        for feat, direction in config.dataset.monotone_constraints.items()
         if feat in all_feature_names
     }
 

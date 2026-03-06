@@ -9,23 +9,24 @@ from .config import HAS_TORCH, torch, nn, log
 if HAS_TORCH:
 
     def gamma_deviance_loss(
-        y_pred: "torch.Tensor", y_true: "torch.Tensor"
+        y_pred: "torch.Tensor", y_true: "torch.Tensor", floor: float = 1.0
     ) -> "torch.Tensor":
         """Compute mean Gamma deviance loss for a mini-batch.
 
         Unit deviance: 2 * [-log(y_true / y_pred) + (y_true - y_pred) / y_pred]
-        Both y_pred and y_true are clamped to a minimum of 1.0 to prevent
+        Both y_pred and y_true are clamped to ``floor`` to prevent
         numerical instability.
 
         Args:
-            y_pred: Predicted premium values, shape (batch,).
-            y_true: Observed premium values, shape (batch,).
+            y_pred: Predicted values, shape (batch,).
+            y_true: Observed values, shape (batch,).
+            floor: Minimum clamp value (default 1.0).
 
         Returns:
             Scalar mean Gamma deviance over the batch.
         """
-        y_pred = y_pred.clamp(min=1.0)
-        y_true = y_true.clamp(min=1.0)
+        y_pred = y_pred.clamp(min=floor)
+        y_true = y_true.clamp(min=floor)
         ratio = y_true / y_pred
         unit_dev = 2.0 * (-torch.log(ratio) + (y_true - y_pred) / y_pred)
         return unit_dev.mean()
@@ -89,6 +90,7 @@ if HAS_TORCH:
         base_shape: "torch.Tensor",
         glm_pred: "torch.Tensor",
         kl_alpha: float = 0.1,
+        floor: float = 1.0,
     ) -> "torch.Tensor":
         """Gamma NLL + KL divergence loss for the Distributional Refinement Network.
 
@@ -110,7 +112,7 @@ if HAS_TORCH:
         """
         shape = dist_params[:, 0].clamp(min=1e-6)
         rate = dist_params[:, 1].clamp(min=1e-6)
-        y = y_true.clamp(min=1.0)
+        y = y_true.clamp(min=floor)
 
         # Gamma NLL: -log p(y | shape, rate)
         # = -shape*log(rate) + lgamma(shape) - (shape-1)*log(y) + rate*y
@@ -123,7 +125,7 @@ if HAS_TORCH:
 
         # KL(Gamma(shape, rate) || Gamma(shape0, rate0))
         shape0 = base_shape.expand_as(shape).clamp(min=1e-6)
-        rate0 = (shape0 / glm_pred.clamp(min=1.0))
+        rate0 = (shape0 / glm_pred.clamp(min=floor))
         kl = (
             (shape - shape0) * torch.digamma(shape)
             - torch.lgamma(shape)

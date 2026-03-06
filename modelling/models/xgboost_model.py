@@ -6,7 +6,7 @@ from typing import Any, Dict, List, Optional
 
 from ..config import (
     DLConfig, HAS_XGBOOST, xgb,
-    np, log, time, MONOTONE_CONSTRAINTS, _clamp_predictions, _compute_metrics,
+    np, log, time, _clamp_predictions, _compute_metrics,
 )
 from ..data import DLFeatureBundle
 
@@ -65,7 +65,7 @@ def train_xgboost(
     )
 
     all_feature_names = cont_names + bundle.categorical_feature_names
-    mono_tuple = tuple(MONOTONE_CONSTRAINTS.get(f, 0) for f in all_feature_names)
+    mono_tuple = tuple(config.dataset.monotone_constraints.get(f, 0) for f in all_feature_names)
 
     params = {k: v for k, v in best_params.items()}
     n_estimators = params.pop("n_estimators", 1000)

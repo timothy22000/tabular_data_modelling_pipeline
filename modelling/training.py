@@ -10,9 +10,9 @@ import numpy as np
 from .config import (
     DLConfig,
     HAS_TORCH, torch, nn, DataLoader,
-    log, MONOTONE_CONSTRAINTS, _clamp_predictions, _compute_metrics,
+    log, _clamp_predictions, _compute_metrics,
 )
-from .data import DLFeatureBundle, PremiumDataset, build_dataloaders
+from .data import DLFeatureBundle, TabularDataset, build_dataloaders
 from .losses import gamma_deviance_loss, monotonicity_penalty
 
 
@@ -143,6 +143,7 @@ def _resolve_device(config: DLConfig) -> "torch.device":
 
 def _get_monotone_cont_indices(
     continuous_feature_names: List[str],
+    monotone_constraints: Optional[Dict[str, int]] = None,
 ) -> Tuple[List[int], List[int]]:
     """Get indices and directions for monotonicity-constrained continuous features.
 
@@ -151,15 +152,19 @@ def _get_monotone_cont_indices(
 
     Args:
         continuous_feature_names: Ordered list of continuous feature names.
+        monotone_constraints: Mapping of feature name to direction (+1/-1).
+            If None, no constraints are applied.
 
     Returns:
         Tuple of (feature_indices, directions) for features present in
-        MONOTONE_CONSTRAINTS with non-zero constraint.
+        monotone_constraints with non-zero constraint.
     """
+    if not monotone_constraints:
+        return [], []
     indices: List[int] = []
     directions: List[int] = []
     for i, name in enumerate(continuous_feature_names):
-        direction = MONOTONE_CONSTRAINTS.get(name, 0)
+        direction = monotone_constraints.get(name, 0)
         if direction != 0:
             indices.append(i)
             directions.append(direction)
@@ -363,7 +368,9 @@ def train_dl_model(
     device = _resolve_device(config)
     model = model.to(device)
 
-    mono_indices, mono_directions = _get_monotone_cont_indices(continuous_feature_names)
+    mono_indices, mono_directions = _get_monotone_cont_indices(
+        continuous_feature_names, config.dataset.monotone_constraints
+    )
 
     epochs = config.epochs
     if config.quick:
@@ -536,7 +543,7 @@ def _train_dl_ensemble(
     base_mode = base_mode_map.get(architecture, "none")
 
     # Build a full-training DataLoader (no val split) for final predictions
-    full_train_dataset = PremiumDataset(
+    full_train_dataset = TabularDataset(
         x_cont=bundle.X_train_cont,
         x_cat=bundle.X_train_cat,
         y=bundle.y_train,
@@ -569,7 +576,7 @@ def _train_dl_ensemble(
             if torch.cuda.is_available():
                 torch.cuda.manual_seed_all(member_seed)
 
-        model = build_dl_model(architecture, params, bundle)
+        model = build_dl_model(architecture, params, bundle, config.dataset.prediction_floor)
         result = train_dl_model(
             model=model,
             train_loader=train_loader,
