@@ -1,0 +1,105 @@
+{
+  "pipeline": "dl",
+  "timestamp": "2026-03-05T18:03:15.413049",
+  "config": {
+    "seed": 42,
+    "n_tuning_trials": 30,
+    "cv_folds": 5,
+    "quick": false,
+    "architectures": [
+      "localglmnet"
+    ],
+    "epochs": 500,
+    "patience": 30,
+    "batch_size": 512,
+    "n_ensemble": 3,
+    "catboost_iterations": 2000,
+    "mono_lambda": 0.1
+  },
+  "best_model": "localglmnet",
+  "double_lift_vs_glm": 1.0015,
+  "glm_gini": 0.3291,
+  "models": {
+    "localglmnet": {
+      "metrics_train": {
+        "split": "train",
+        "n": 24703,
+        "n_params": 0,
+        "gini": 0.307344,
+        "mae": 467.5845,
+        "rmse": 869.7359,
+        "cv_rmse": 0.885793,
+        "ae_ratio": 0.986099,
+        "mean_actual": 981.8727,
+        "mean_predicted": 995.7139,
+        "gamma_deviance": -8425.48484
+      },
+      "metrics_test": {
+        "split": "test",
+        "n": 6176,
+        "n_params": 0,
+        "gini": 0.329569,
+        "mae": 516.5923,
+        "rmse": 1216.8664,
+        "cv_rmse": 1.167287,
+        "ae_ratio": 1.044084,
+        "mean_actual": 1042.4738,
+        "mean_predicted": 998.4574,
+        "gamma_deviance": -2295.509723
+      },
+      "training_time": 95.33578300476074,
+      "best_params": {
+        "hidden_dims": [
+          64,
+          32
+        ],
+        "dropout": 0.3,
+        "coeff_reg": 1.0,
+        "lr": 0.0001,
+        "weight_decay": 0.01
+      },
+      "n_params": 18510,
+      "n_ensemble_members": 3,
+      "best_epochs": [
+        1,
+        4,
+        1
+      ]
+    },
+    "stacked_ensemble": {
+      "metrics_train": {
+        "split": "train",
+        "n": 24703,
+        "n_params": 0,
+        "gini": 0.307174,
+        "mae": 463.9025,
+        "rmse": 868.5442,
+        "cv_rmse": 0.884579,
+        "ae_ratio": 0.999486,
+        "mean_actual": 981.8727,
+        "mean_predicted": 982.3773,
+        "gamma_deviance": -8414.58964
+      },
+      "metrics_test": {
+        "split": "test",
+        "n": 6176,
+        "n_params": 0,
+        "gini": 0.329464,
+        "mae": 512.4282,
+        "rmse": 1218.0296,
+        "cv_rmse": 1.168403,
+        "ae_ratio": 1.059075,
+        "mean_actual": 1042.4738,
+        "mean_predicted": 984.3247,
+        "gamma_deviance": -2297.485617
+      },
+      "training_time": 0.0036363601684570312,
+      "best_params": {},
+      "n_params": 2,
+      "base_weights": {
+        "glm": 0.5978573461954024,
+        "localglmnet": 0.4021426538045976
+      }
+    }
+  }
+}

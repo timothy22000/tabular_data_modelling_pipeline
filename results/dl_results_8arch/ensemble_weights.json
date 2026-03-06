@@ -1,0 +1,11 @@
+{
+  "glm": 0.0,
+  "catboost": 0.4356672275768727,
+  "xgboost": 0.5598634866365079,
+  "cann": 0.0,
+  "cann_gbm": 0.004469285786619436,
+  "ft_transformer": 0.0,
+  "tabm": 0.0,
+  "localglmnet": 0.0,
+  "drn": 0.0
+}

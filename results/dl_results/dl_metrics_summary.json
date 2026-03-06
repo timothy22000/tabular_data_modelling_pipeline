@@ -1,0 +1,41 @@
+{
+  "localglmnet": {
+    "metrics_train": {
+      "split": "train",
+      "n": 24703,
+      "n_params": 0,
+      "gini": 0.307344,
+      "mae": 467.5845,
+      "rmse": 869.7359,
+      "cv_rmse": 0.885793,
+      "ae_ratio": 0.986099,
+      "mean_actual": 981.8727,
+      "mean_predicted": 995.7139,
+      "gamma_deviance": -8425.48484
+    },
+    "metrics_test": {
+      "split": "test",
+      "n": 6176,
+      "n_params": 0,
+      "gini": 0.329569,
+      "mae": 516.5923,
+      "rmse": 1216.8664,
+      "cv_rmse": 1.167287,
+      "ae_ratio": 1.044084,
+      "mean_actual": 1042.4738,
+      "mean_predicted": 998.4574,
+      "gamma_deviance": -2295.509723
+    },
+    "best_params": {
+      "hidden_dims": [
+        64,
+        32
+      ],
+      "dropout": 0.3,
+      "coeff_reg": 1.0,
+      "lr": 0.0001,
+      "weight_decay": 0.01
+    },
+    "training_time": 95.33578300476074
+  }
+}
