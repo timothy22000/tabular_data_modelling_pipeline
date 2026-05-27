@@ -7,4 +7,9 @@ dist/
 build/
 .pytest_cache/
 results/
-data/
+
+# Datasets are downloaded on demand via scripts/download_data.py
+# (gitignore data/ but allow the bundled Medical Insurance sample).
+data/*
+!data/medical_insurance.csv
+!data/README.md
