@@ -11,6 +11,15 @@ from ..config import (
 from ..data import DLFeatureBundle
 
 
+# Map DatasetConfig.family -> XGBoost objective string.
+_XGB_OBJECTIVE_BY_FAMILY: Dict[str, str] = {
+    "gaussian": "reg:squarederror",
+    "gamma": "reg:gamma",
+    "tweedie": "reg:tweedie",
+    "poisson": "count:poisson",
+}
+
+
 def get_default_dl_params(architecture: str) -> Dict[str, Any]:
     """Import and delegate to models/__init__.py — avoids circular import."""
     from . import get_default_dl_params as _get
@@ -22,7 +31,16 @@ def train_xgboost(
     config: DLConfig,
     best_params: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
-    """Train an XGBRegressor with Gamma objective and monotone constraints.
+    """Train an XGBRegressor with a family-appropriate objective and monotone constraints.
+
+    The objective is chosen from ``config.dataset.family``:
+
+    - ``gaussian`` -> ``reg:squarederror``
+    - ``gamma``    -> ``reg:gamma``
+    - ``tweedie``  -> ``reg:tweedie``
+    - ``poisson``  -> ``count:poisson``
+
+    Unrecognised families fall back to ``reg:squarederror`` with a warning.
 
     Uses the RAW (non-standardised) feature matrices, label-encoded
     categoricals, and aligns the monotone_constraints tuple to the column
@@ -74,13 +92,31 @@ def train_xgboost(
         n_estimators = min(n_estimators, 300)
         log.info("  [quick] XGBoost n_estimators capped at %d", n_estimators)
 
+    family = config.dataset.family
+    objective = _XGB_OBJECTIVE_BY_FAMILY.get(family, "reg:squarederror")
+    if family not in _XGB_OBJECTIVE_BY_FAMILY:
+        log.warning(
+            "XGBoost: family=%r not recognised; falling back to reg:squarederror.",
+            family,
+        )
+
+    # For count:poisson, XGBoost's auto base_score computation can
+    # produce inf and crash training. Set it explicitly to log(mean(y))
+    # which is the canonical Poisson MLE intercept.
+    extra_kwargs: Dict[str, Any] = {}
+    if objective == "count:poisson":
+        y_pos = bundle.y_train[bundle.y_train > 0]
+        if len(y_pos):
+            extra_kwargs["base_score"] = float(np.log(np.mean(y_pos)))
+
     model = xgb.XGBRegressor(
-        objective="reg:gamma",
+        objective=objective,
         n_estimators=n_estimators,
         early_stopping_rounds=early_stopping_rounds,
         monotone_constraints=mono_tuple,
         random_state=config.seed,
         verbosity=1,
+        **extra_kwargs,
         **params,
     )
 

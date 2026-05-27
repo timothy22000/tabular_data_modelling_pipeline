@@ -11,6 +11,17 @@ from ..config import (
 from ..data import DLFeatureBundle
 
 
+# Map DatasetConfig.family -> CatBoost (loss_function, eval_metric).
+# CatBoost has no native Gamma loss; Tweedie with variance_power=2 is the
+# gamma family, so we use that for gamma targets.
+_CATBOOST_LOSS_BY_FAMILY: Dict[str, tuple[str, str]] = {
+    "gaussian": ("RMSE", "RMSE"),
+    "gamma":    ("Tweedie:variance_power=2.0", "RMSE"),
+    "tweedie":  ("Tweedie:variance_power=1.5", "RMSE"),
+    "poisson":  ("Poisson", "Poisson"),
+}
+
+
 def get_default_dl_params(architecture: str) -> Dict[str, Any]:
     """Import and delegate to models/__init__.py — avoids circular import."""
     from . import get_default_dl_params as _get
@@ -73,6 +84,13 @@ def train_catboost(
         iterations = min(iterations, 200)
         log.info("  [quick] CatBoost iterations capped at %d", iterations)
 
+    family = config.dataset.family
+    loss_function, eval_metric = _CATBOOST_LOSS_BY_FAMILY.get(family, ("RMSE", "RMSE"))
+    if family not in _CATBOOST_LOSS_BY_FAMILY:
+        log.warning(
+            "CatBoost: family=%r not recognised; falling back to RMSE.", family,
+        )
+
     model = CatBoostRegressor(
         iterations=iterations,
         learning_rate=learning_rate,
@@ -80,8 +98,8 @@ def train_catboost(
         l2_leaf_reg=l2_leaf_reg,
         subsample=subsample,
         bagging_temperature=bagging_temperature,
-        loss_function="RMSE",
-        eval_metric="RMSE",
+        loss_function=loss_function,
+        eval_metric=eval_metric,
         monotone_constraints=mono_constraints,
         random_seed=config.seed,
         verbose=100,

@@ -184,13 +184,12 @@ typically need 100k+ rows and longer training to be competitive.
 
 ## Pre-trained models on Hugging Face
 
-If you don't want to train from scratch, the **House Prices** baselines are
-available on the Hub:
+Pre-trained baselines are on the Hub:
 
-| Resource | Link |
-|---|---|
-| 📂 Dataset | [`t22000t/house-prices-tabular`](https://huggingface.co/datasets/t22000t/house-prices-tabular) |
-| 🤖 Pre-trained CatBoost + XGBoost | [`t22000t/house-prices-tabular-models`](https://huggingface.co/t22000t/house-prices-tabular-models) |
+| Dataset | Family | Dataset card | Model collection | Best test Gini |
+|---|---|---|---|---|
+| House Prices | gamma | [`house-prices-tabular`](https://huggingface.co/datasets/t22000t/house-prices-tabular) | [`house-prices-tabular-models`](https://huggingface.co/t22000t/house-prices-tabular-models) | 0.2061 (CatBoost) |
+| Bike Sharing | poisson | [`bike-sharing-tabular`](https://huggingface.co/datasets/t22000t/bike-sharing-tabular) | [`bike-sharing-tabular-models`](https://huggingface.co/t22000t/bike-sharing-tabular-models) | 0.4975 (XGBoost) |
 
 Quick inference:
 
@@ -211,14 +210,18 @@ df = pd.read_csv("hf://datasets/t22000t/house-prices-tabular/train.csv")
 preds = model.predict(df[features])
 ```
 
-Baselines (80/20 split, no Optuna tuning):
+The pipeline dispatches XGBoost objectives and CatBoost loss functions
+automatically based on `DatasetConfig.family`:
 
-| Model | Test Gini | Test MAE | Training time |
-|---|---|---|---|
-| CatBoost | 0.2061 | $16,868 | 4.4 s |
-| XGBoost | 0.2049 | $17,204 | 0.3 s |
+| Family | XGBoost objective | CatBoost loss |
+|---|---|---|
+| `gaussian` | `reg:squarederror` | `RMSE` |
+| `gamma` | `reg:gamma` | `Tweedie:variance_power=2.0` |
+| `tweedie` | `reg:tweedie` | `Tweedie:variance_power=1.5` |
+| `poisson` | `count:poisson` | `Poisson` |
 
-DL architectures (CANN, FT-Transformer, TabM, ...) will land in a v2 drop.
+DL architectures (CANN, FT-Transformer, TabM, ...) will land in a v2 drop
+for both dataset families.
 
 ## CLI reference
 
@@ -352,4 +355,6 @@ MIT - see [LICENSE](LICENSE).
 
 - 📂 [t22000t/house-prices-tabular](https://huggingface.co/datasets/t22000t/house-prices-tabular) - House Prices dataset on HF with baseline metrics
 - 🤖 [t22000t/house-prices-tabular-models](https://huggingface.co/t22000t/house-prices-tabular-models) - pre-trained models for the above
+- 📂 [t22000t/bike-sharing-tabular](https://huggingface.co/datasets/t22000t/bike-sharing-tabular) - Bike Sharing dataset on HF (Poisson family)
+- 🤖 [t22000t/bike-sharing-tabular-models](https://huggingface.co/t22000t/bike-sharing-tabular-models) - pre-trained Poisson baselines for the above
 - 🔒 [data-anonymization-toolkit](https://github.com/timothy22000/data-anonymization-toolkit) - config-driven anonymization, synthetic data generation, and red-team validation for the same kind of tabular data this pipeline trains on. Pairs with [Privacy Lab](https://huggingface.co/spaces/t22000t/privacy-lab) and [Synthetic Data Privacy Audit](https://huggingface.co/spaces/t22000t/synthetic-data-privacy-audit) Spaces.
