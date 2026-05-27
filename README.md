@@ -182,6 +182,44 @@ Example metrics from a run on UK net-premium data (25k rows):
 \* FT-Transformer and TabM under-fit at the default 25k-row scale; they
 typically need 100k+ rows and longer training to be competitive.
 
+## Pre-trained models on Hugging Face
+
+If you don't want to train from scratch, the **House Prices** baselines are
+available on the Hub:
+
+| Resource | Link |
+|---|---|
+| 📂 Dataset | [`t22000t/house-prices-tabular`](https://huggingface.co/datasets/t22000t/house-prices-tabular) |
+| 🤖 Pre-trained CatBoost + XGBoost | [`t22000t/house-prices-tabular-models`](https://huggingface.co/t22000t/house-prices-tabular-models) |
+
+Quick inference:
+
+```python
+from huggingface_hub import hf_hub_download
+from catboost import CatBoostRegressor
+import pandas as pd
+
+# Load model
+path = hf_hub_download("t22000t/house-prices-tabular-models", "catboost.cbm")
+model = CatBoostRegressor()
+model.load_model(path)
+
+# Load dataset
+df = pd.read_csv("hf://datasets/t22000t/house-prices-tabular/train.csv")
+
+# See the model card for the full feature list
+preds = model.predict(df[features])
+```
+
+Baselines (80/20 split, no Optuna tuning):
+
+| Model | Test Gini | Test MAE | Training time |
+|---|---|---|---|
+| CatBoost | 0.2061 | $16,868 | 4.4 s |
+| XGBoost | 0.2049 | $17,204 | 0.3 s |
+
+DL architectures (CANN, FT-Transformer, TabM, ...) will land in a v2 drop.
+
 ## CLI reference
 
 ```
@@ -312,4 +350,6 @@ MIT - see [LICENSE](LICENSE).
 
 ## Related projects
 
-- [data-anonymization-toolkit](https://github.com/timothy22000/data-anonymization-toolkit) - config-driven anonymization, synthetic data generation, and red-team validation for the same kind of tabular data this pipeline trains on.
+- 📂 [t22000t/house-prices-tabular](https://huggingface.co/datasets/t22000t/house-prices-tabular) - House Prices dataset on HF with baseline metrics
+- 🤖 [t22000t/house-prices-tabular-models](https://huggingface.co/t22000t/house-prices-tabular-models) - pre-trained models for the above
+- 🔒 [data-anonymization-toolkit](https://github.com/timothy22000/data-anonymization-toolkit) - config-driven anonymization, synthetic data generation, and red-team validation for the same kind of tabular data this pipeline trains on. Pairs with [Privacy Lab](https://huggingface.co/spaces/t22000t/privacy-lab) and [Synthetic Data Privacy Audit](https://huggingface.co/spaces/t22000t/synthetic-data-privacy-audit) Spaces.
