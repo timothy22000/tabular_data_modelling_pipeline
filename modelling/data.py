@@ -235,6 +235,16 @@ def _build_glm_predictions(
         glm_dispersion = 1.0
         log.info("  GLM dispersion not available — using 1.0")
 
+    # Guard against NaN / non-positive dispersion (can happen when the
+    # GLM fit hits a degenerate residual structure). DRN consumes this
+    # as a fixed scale parameter; a NaN here poisons every prediction.
+    if not (glm_dispersion > 0 and np.isfinite(glm_dispersion)):
+        log.warning(
+            "  GLM dispersion = %s is invalid — falling back to 1.0",
+            glm_dispersion,
+        )
+        glm_dispersion = 1.0
+
     glm_gini_train = compute_gini(y_train, glm_train_preds)
     log.info(
         "  GLM base — Train Gini: %.4f  |  n_params: %d  |  dispersion: %.6f",

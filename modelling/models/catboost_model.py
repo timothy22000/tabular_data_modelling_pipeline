@@ -16,7 +16,10 @@ from ..data import DLFeatureBundle
 # gamma family, so we use that for gamma targets.
 _CATBOOST_LOSS_BY_FAMILY: Dict[str, tuple[str, str]] = {
     "gaussian": ("RMSE", "RMSE"),
-    "gamma":    ("Tweedie:variance_power=2.0", "RMSE"),
+    # CatBoost has no native Gamma loss; Tweedie with variance_power -> 2
+    # is the gamma distribution. CatBoost enforces 1 < variance_power < 2
+    # strictly, so we use 1.99 as the closest valid approximation.
+    "gamma":    ("Tweedie:variance_power=1.99", "RMSE"),
     "tweedie":  ("Tweedie:variance_power=1.5", "RMSE"),
     "poisson":  ("Poisson", "Poisson"),
 }

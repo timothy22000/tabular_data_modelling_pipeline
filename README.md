@@ -184,12 +184,35 @@ typically need 100k+ rows and longer training to be competitive.
 
 ## Pre-trained models on Hugging Face
 
-Pre-trained baselines are on the Hub:
+**All 8 architectures** are pre-trained and available on the Hub for both datasets:
 
 | Dataset | Family | Dataset card | Model collection | Best test Gini |
 |---|---|---|---|---|
-| House Prices | gamma | [`house-prices-tabular`](https://huggingface.co/datasets/t22000t/house-prices-tabular) | [`house-prices-tabular-models`](https://huggingface.co/t22000t/house-prices-tabular-models) | 0.2061 (CatBoost) |
+| House Prices | gamma | [`house-prices-tabular`](https://huggingface.co/datasets/t22000t/house-prices-tabular) | [`house-prices-tabular-models`](https://huggingface.co/t22000t/house-prices-tabular-models) | 0.2049 (XGBoost) |
 | Bike Sharing | poisson | [`bike-sharing-tabular`](https://huggingface.co/datasets/t22000t/bike-sharing-tabular) | [`bike-sharing-tabular-models`](https://huggingface.co/t22000t/bike-sharing-tabular-models) | 0.4975 (XGBoost) |
+
+Each collection ships CatBoost (`.cbm`), XGBoost (`.json`), and 3-seed
+ensembles of the six DL architectures (`.pt` files) plus the Plotly
+interpretability dashboard and figures.
+
+**Test Gini comparison** (no Optuna tuning):
+
+| Architecture | House Prices (gamma, 1.5k rows) | Bike Sharing (poisson, 17k rows) |
+|---|---:|---:|
+| **XGBoost** | **0.205** | **0.498** |
+| CatBoost | 0.200 | 0.494 |
+| CANN-GBM | 0.194 | 0.488 |
+| LocalGLMnet | 0.199 | 0.314 |
+| CANN | 0.194 | 0.309 |
+| DRN | 0.196 | 0.293† |
+| TabM | 0.033* | 0.163* |
+| FT-Transformer | 0.037* | 0.124* |
+
+\* FT-Transformer and TabM consistently underperform GBMs on tabular
+data of this scale - the literature suggests they need 50k+ rows and
+careful tuning to be competitive.
+† DRN on Bike Sharing has good rank order (Gini=0.29) but poor
+calibration (MAE off by ~20×) - see the model card for details.
 
 Quick inference:
 
@@ -216,12 +239,9 @@ automatically based on `DatasetConfig.family`:
 | Family | XGBoost objective | CatBoost loss |
 |---|---|---|
 | `gaussian` | `reg:squarederror` | `RMSE` |
-| `gamma` | `reg:gamma` | `Tweedie:variance_power=2.0` |
+| `gamma` | `reg:gamma` | `Tweedie:variance_power=1.99` (no native Gamma in CatBoost) |
 | `tweedie` | `reg:tweedie` | `Tweedie:variance_power=1.5` |
 | `poisson` | `count:poisson` | `Poisson` |
-
-DL architectures (CANN, FT-Transformer, TabM, ...) will land in a v2 drop
-for both dataset families.
 
 ## CLI reference
 
