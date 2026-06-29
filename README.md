@@ -414,9 +414,10 @@ tabular_data_modelling_pipeline/
 │   └── example_allstate.py
 ├── scripts/
 │   └── download_data.py           # Multi-source dataset fetcher
-├── tests/                         # 91 pytest cases
+├── tests/                         # 138 pytest cases
 ├── data/                          # Datasets (only Medical Insurance committed)
-└── results/                       # Pipeline outputs (gitignored)
+├── results/                       # Pipeline outputs (gitignored)
+└── legacy/                        # Pre-refactor monolithic scripts (historical only - see legacy/README.md)
 ```
 
 ## Citation

@@ -13,3 +13,13 @@ results/
 data/*
 !data/medical_insurance.csv
 !data/README.md
+
+# Local artefacts from training / HF uploads (not part of the repo).
+catboost_info/
+allstate_training.log
+allstate_training.pid
+hf_dataset/
+hf_dataset_bike_sharing/
+hf_models_allstate/
+hf_models_bike_sharing/
+hf_models_house_prices/
