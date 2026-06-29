@@ -141,13 +141,20 @@ def save_all_outputs(
 
     # ------------------------------------------------------------------
     # XGBoost model JSON
+    #
+    # NOTE: XGBRegressor.save_model() goes through a sklearn-wrapped path
+    # that requires `_estimator_type` to be defined on the class. Newer
+    # sklearn versions enforce this strictly and the call fails with
+    # `_estimator_type undefined`. We bypass the wrapper by calling
+    # save_model on the underlying Booster directly - the native JSON
+    # format is what HF model cards reference anyway.
     # ------------------------------------------------------------------
     if "xgboost" in results and "error" not in results["xgboost"]:
         try:
             xgb_model = results["xgboost"].get("model")
             if xgb_model is not None and HAS_XGBOOST:
                 xgb_path = output_dir / "xgboost.json"
-                xgb_model.save_model(str(xgb_path))
+                xgb_model.get_booster().save_model(str(xgb_path))
                 log.info("  XGBoost model saved to %s", xgb_path)
         except Exception as exc:
             log.warning("  XGBoost model save failed: %s", exc)

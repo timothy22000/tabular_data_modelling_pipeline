@@ -63,6 +63,28 @@ def train_all_models(
     arch_order = ["catboost", "xgboost", "cann", "cann_gbm", "ft_transformer", "tabm", "localglmnet", "drn"]
     active_archs = [a for a in arch_order if a in config.architectures]
 
+    # DRN's architecture and loss function are derived for a Gamma response
+    # distribution: it refines the Gamma (shape, rate) parameters around a
+    # GLM base prediction and minimises Gamma NLL + KL(Gamma||Gamma_base).
+    # Running DRN on a non-Gamma family (Poisson counts, Gaussian, etc.)
+    # minimises the wrong objective and produces miscalibrated predictions
+    # even when rank order looks fine. Skip DRN with an explicit warning
+    # rather than silently shipping broken artefacts. A Poisson/Tweedie
+    # variant would require a new architecture + loss, not a config flag.
+    if "drn" in active_archs and config.dataset.family not in ("gamma", "tweedie"):
+        log.warning(
+            "  DRN skipped: requires gamma or tweedie family "
+            "(got '%s'). The architecture refines Gamma (shape, rate) "
+            "parameters and the loss is Gamma NLL; running it on '%s' "
+            "data produces well-ranked but badly calibrated predictions. "
+            "If you need a distributional model for this family, retrain "
+            "with --architectures excluding drn, or implement a "
+            "family-specific variant.",
+            config.dataset.family,
+            config.dataset.family,
+        )
+        active_archs = [a for a in active_archs if a != "drn"]
+
     # If cann_gbm requested but catboost not in architectures, load saved model
     if "cann_gbm" in config.architectures and "catboost" not in config.architectures:
         if bundle.gbm_train_preds is None:

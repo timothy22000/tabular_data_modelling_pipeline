@@ -1,4 +1,14 @@
-"""DRN — Distributional Refinement Network (Avanzi et al. 2023)."""
+"""DRN - Distributional Refinement Network (Avanzi et al. 2023).
+
+NOTE: This implementation is derived for the **Gamma** response family.
+The network refines Gamma (shape, rate) parameters around a GLM base
+prediction, and the training loss is Gamma NLL + KL(Gamma||Gamma_base).
+Running DRN on Poisson, Gaussian, or other non-Gamma data minimises the
+wrong objective. The pipeline orchestrator (modelling/orchestration.py)
+skips DRN automatically when ``config.dataset.family`` is not gamma or
+tweedie; a family-specific variant would require a new architecture and
+loss, not a config flag.
+"""
 from __future__ import annotations
 
 from typing import Any, List, Optional, Tuple
