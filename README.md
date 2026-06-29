@@ -184,35 +184,45 @@ typically need 100k+ rows and longer training to be competitive.
 
 ## Pre-trained models on Hugging Face
 
-**All 8 architectures** are pre-trained and available on the Hub for both datasets:
+**All 8 architectures** are pre-trained and available on the Hub for three datasets:
 
-| Dataset | Family | Dataset card | Model collection | Best test Gini |
-|---|---|---|---|---|
-| House Prices | gamma | [`house-prices-tabular`](https://huggingface.co/datasets/t22000t/house-prices-tabular) | [`house-prices-tabular-models`](https://huggingface.co/t22000t/house-prices-tabular-models) | 0.2049 (XGBoost) |
-| Bike Sharing | poisson | [`bike-sharing-tabular`](https://huggingface.co/datasets/t22000t/bike-sharing-tabular) | [`bike-sharing-tabular-models`](https://huggingface.co/t22000t/bike-sharing-tabular-models) | 0.4975 (XGBoost) |
+| Dataset | Family | Rows | Dataset card | Model collection | Best test Gini |
+|---|---|---:|---|---|---|
+| House Prices | gamma | 1,460 | [`house-prices-tabular`](https://huggingface.co/datasets/t22000t/house-prices-tabular) | [`house-prices-tabular-models`](https://huggingface.co/t22000t/house-prices-tabular-models) | 0.2049 (XGBoost) |
+| Bike Sharing | poisson | 17,379 | [`bike-sharing-tabular`](https://huggingface.co/datasets/t22000t/bike-sharing-tabular) | [`bike-sharing-tabular-models`](https://huggingface.co/t22000t/bike-sharing-tabular-models) | 0.4975 (XGBoost) |
+| Allstate Claims Severity | gamma | 188,318 | _Kaggle (auth)_ | [`allstate-tabular-models`](https://huggingface.co/t22000t/allstate-tabular-models) | 0.3473 (CANN-GBM) |
+
+The Allstate competition rules permit only non-commercial use, so its
+raw CSV is not redistributed - the model collection ships
+`example_allstate.py` + pre-trained weights, and the
+[download script](scripts/download_data.py) pulls the data from Kaggle on demand.
 
 Each collection ships CatBoost (`.cbm`), XGBoost (`.json`), and 3-seed
 ensembles of the six DL architectures (`.pt` files) plus the Plotly
 interpretability dashboard and figures.
 
-**Test Gini comparison** (no Optuna tuning):
+**Test Gini comparison** (no Optuna tuning, 80/20 split, default hyperparameters):
 
-| Architecture | House Prices (gamma, 1.5k rows) | Bike Sharing (poisson, 17k rows) |
-|---|---:|---:|
-| **XGBoost** | **0.205** | **0.498** |
-| CatBoost | 0.200 | 0.494 |
-| CANN-GBM | 0.194 | 0.488 |
-| LocalGLMnet | 0.199 | 0.314 |
-| CANN | 0.194 | 0.309 |
-| DRN | 0.196 | 0.293† |
-| TabM | 0.033* | 0.163* |
-| FT-Transformer | 0.037* | 0.124* |
+| Architecture | House Prices (gamma, 1.5k) | Bike Sharing (poisson, 17k) | Allstate (gamma, 188k) |
+|---|---:|---:|---:|
+| **XGBoost** | **0.205** | **0.498** | 0.347 |
+| CatBoost | 0.200 | 0.494 | 0.346 |
+| **CANN-GBM** | 0.194 | 0.488 | **0.347** ‡ |
+| LocalGLMnet | 0.199 | 0.314 | 0.343 |
+| CANN | 0.194 | 0.309 | 0.346 |
+| DRN | 0.196 | 0.293† | 0.345 |
+| TabM | 0.033* | 0.163* | 0.343 |
+| FT-Transformer | 0.037* | 0.124* | 0.028* |
 
-\* FT-Transformer and TabM consistently underperform GBMs on tabular
-data of this scale - the literature suggests they need 50k+ rows and
-careful tuning to be competitive.
+\* FT-Transformer and TabM consistently underperform GBMs without tuning.
+On Allstate FT-T failed to converge entirely (2 of 3 ensemble members
+plateaued near the global mean).
 † DRN on Bike Sharing has good rank order (Gini=0.29) but poor
-calibration (MAE off by ~20×) - see the model card for details.
+calibration (MAE off by ~20×) - see model card.
+‡ On Allstate, CANN-GBM is the top model (0.3473) by 5 bp over XGBoost
+(0.3468). The NNLS-stacked ensemble lands at Gini 0.3472 with the
+**best MAE of all** ($1,144) - within 1.6% of the Kaggle leaderboard
+top scores, which used extensive tuning.
 
 Quick inference:
 
