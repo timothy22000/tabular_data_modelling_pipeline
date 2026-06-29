@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Live Training Monitor - Tabular Pipeline</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.plot.ly/plotly-3.0.1.min.js" charset="utf-8"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="title-wrap">
+      <h1>Live Training Monitor</h1>
+      <p class="subtitle">
+        Parses the active training log and updates every 2 seconds.
+        <a href="index.html">← Back to dashboard</a>
+      </p>
+    </div>
+    <div class="meta-wrap">
+      <span class="meta-item" id="meta-status">idle</span>
+      <span class="meta-item" id="meta-elapsed">--</span>
+      <span class="meta-item" id="meta-arch">no run</span>
+    </div>
+  </header>
+
+  <main class="layout">
+    <aside class="sidebar">
+      <h2 class="sidebar-heading">Log file</h2>
+      <div style="padding: 0 16px;">
+        <label style="font-size:11px; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.08em; display:block; margin-bottom:6px;">
+          Path (relative to repo root)
+        </label>
+        <input id="log-path-input" type="text" value="hp_tuned.log"
+               style="width:100%; box-sizing:border-box; padding:8px 10px; background:var(--bg);
+                      border:1px solid var(--border); border-radius:4px;
+                      color:var(--text); font-family:var(--font-mono); font-size:12px;" />
+        <button id="connect-btn"
+                style="margin-top:8px; width:100%; padding:8px;
+                       background:var(--accent); color:white; border:none;
+                       border-radius:4px; cursor:pointer; font-weight:500;">
+          Connect
+        </button>
+        <p style="font-size:11px; color:var(--text-dim); margin-top:12px;">
+          Common paths:
+        </p>
+        <ul style="font-family:var(--font-mono); font-size:11px; padding-left:18px; color:var(--text-dim); margin:4px 0;">
+          <li>hp_tuned.log</li>
+          <li>bs_interp.log</li>
+          <li>allstate_training.log</li>
+        </ul>
+      </div>
+
+      <h2 class="sidebar-heading">Status</h2>
+      <div id="status-summary" style="padding: 0 16px; font-size:12px;">
+        <div>Active arch: <code id="active-arch">-</code></div>
+        <div>Active ensemble member: <code id="active-member">-</code></div>
+        <div>Latest epoch: <code id="latest-epoch">-</code></div>
+        <div>Best val: <code id="best-val">-</code></div>
+      </div>
+
+      <h2 class="sidebar-heading">Completed architectures</h2>
+      <div id="completed-list" style="padding: 0 16px; font-family:var(--font-mono); font-size:12px;">
+        <div class="empty" style="padding:8px 0;">None yet</div>
+      </div>
+
+      <div class="sidebar-footer">
+        <p>Server endpoint:</p>
+        <code>python scripts/live_log_server.py [log_file]</code>
+      </div>
+    </aside>
+
+    <section class="content">
+      <h2 class="section-title">Training loss curves</h2>
+      <p class="section-sub" id="curve-sub">
+        Connect to a log file to start streaming.
+      </p>
+      <div class="section-block">
+        <div id="loss-chart" class="chart" style="min-height: 400px;"></div>
+      </div>
+      <div class="section-block">
+        <h3>Optuna best score per architecture</h3>
+        <div id="optuna-chart" class="chart" style="min-height: 320px;"></div>
+      </div>
+      <div class="section-block">
+        <h3>Raw log tail (last 40 lines)</h3>
+        <pre id="log-tail"
+             style="background:var(--bg-elev); padding:16px; border-radius:6px;
+                    font-family:var(--font-mono); font-size:11px; color:var(--text-dim);
+                    overflow-x:auto; white-space:pre-wrap;
+                    max-height: 480px; overflow-y:auto;"></pre>
+      </div>
+    </section>
+  </main>
+
+  <script src="live.js"></script>
+</body>
+</html>

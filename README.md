@@ -253,6 +253,23 @@ automatically based on `DatasetConfig.family`:
 | `tweedie` | `reg:tweedie` | `Tweedie:variance_power=1.5` |
 | `poisson` | `count:poisson` | `Poisson` |
 
+## Training dashboard
+
+A static dashboard aggregates every training run under `results/` into
+one browsable interface - cross-run comparison, per-run metric tables,
+Kaggle leaderboard comparison, and a live training monitor that polls
+the active log file. No server required beyond Python's stdlib.
+
+```bash
+python scripts/build_dashboard.py        # regenerate dashboard/runs.json
+python -m http.server 8000               # from repo root
+# Open http://localhost:8000/dashboard/index.html
+# Or   http://localhost:8000/dashboard/live.html (live training monitor)
+```
+
+See [`dashboard/README.md`](dashboard/README.md) for the full data flow
+and protocol of log lines the live monitor parses.
+
 ## Interpretability
 
 Every full training run (`--skip-interpretability` flag removed) produces

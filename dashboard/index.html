@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tabular Modelling Pipeline - Training Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.plot.ly/plotly-3.0.1.min.js" charset="utf-8"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="title-wrap">
+      <h1>Training Dashboard</h1>
+      <p class="subtitle">8-architecture tabular modelling pipeline -
+        <a href="https://github.com/timothy22000/tabular_data_modelling_pipeline" target="_blank">GitHub</a> ·
+        <a href="https://huggingface.co/t22000t" target="_blank">HF model collections</a>
+      </p>
+    </div>
+    <div class="meta-wrap">
+      <span class="meta-item" id="meta-n-runs">- runs</span>
+      <span class="meta-item" id="meta-datasets">- datasets</span>
+      <span class="meta-item" id="meta-best-model"></span>
+    </div>
+  </header>
+
+  <main class="layout">
+    <aside class="sidebar">
+      <h2 class="sidebar-heading">Views</h2>
+      <ul class="view-list" id="view-list">
+        <li class="view-item active" data-view="compare">Cross-run comparison</li>
+        <li class="view-item" data-view="kaggle">Kaggle leaderboard</li>
+        <li class="view-item"><a href="live.html" style="color:inherit; display:block;">Live training monitor →</a></li>
+      </ul>
+      <h2 class="sidebar-heading">Runs</h2>
+      <ul class="run-list" id="run-list"></ul>
+      <div class="sidebar-footer">
+        <p>Refresh data:</p>
+        <code>python scripts/build_dashboard.py</code>
+      </div>
+    </aside>
+
+    <section class="content" id="content">
+      <div class="loading">Loading runs.json...</div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

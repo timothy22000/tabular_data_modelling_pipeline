@@ -1,0 +1,2098 @@
+{
+  "schema_version": 1,
+  "generated_at": "build-time",
+  "n_runs": 10,
+  "kaggle_reference": {
+    "house_prices": {
+      "kaggle_metric": "rmsle",
+      "leaderboard_top": "~0.105-0.115",
+      "leaderboard_top_25pct": "~0.13-0.15",
+      "leaderboard_median": "~0.17-0.20",
+      "competition_url": "https://www.kaggle.com/c/house-prices-advanced-regression-techniques"
+    },
+    "bike_sharing": {
+      "kaggle_metric": "rmsle",
+      "leaderboard_top": "~0.33-0.34",
+      "leaderboard_top_25pct": "~0.36-0.39",
+      "leaderboard_median": "~0.42-0.45",
+      "note": "Kaggle uses chronological split (days 1-19 train, 20-31 test); our 80/20 random is more favourable.",
+      "competition_url": "https://www.kaggle.com/c/bike-sharing-demand"
+    },
+    "allstate": {
+      "kaggle_metric": "mae",
+      "leaderboard_winner": "~1110 (Alexey Noskov, private LB)",
+      "leaderboard_top_10": "~1109-1116",
+      "leaderboard_top_100": "~1118-1135",
+      "leaderboard_median": "~1170-1200",
+      "vanilla_xgboost_baseline": "~1180-1220",
+      "competition_url": "https://www.kaggle.com/c/allstate-claims-severity"
+    }
+  },
+  "runs": [
+    {
+      "run_id": "allstate_8arch",
+      "dataset": "allstate",
+      "label": "v2 (8 architectures)",
+      "tuned": false,
+      "models": [
+        {
+          "model": "cann_gbm",
+          "gini_train": 0.3497,
+          "gini_test": 0.3473,
+          "mae": 1158.43,
+          "rmse": 1839.36,
+          "cv_rmse": 0.605,
+          "ae_ratio": 1.0099,
+          "gamma_deviance": -10437.003248,
+          "n_params": 300519.0,
+          "training_time": 881.6
+        },
+        {
+          "model": "stacked_ensemble",
+          "gini_train": 0.3585,
+          "gini_test": 0.3472,
+          "mae": 1144.24,
+          "rmse": 1863.54,
+          "cv_rmse": 0.613,
+          "ae_ratio": 1.0626,
+          "gamma_deviance": -10548.74513,
+          "n_params": 9.0,
+          "training_time": 0.0
+        },
+        {
+          "model": "xgboost",
+          "gini_train": 0.3579,
+          "gini_test": 0.3468,
+          "mae": 1152.26,
+          "rmse": 1849.69,
+          "cv_rmse": 0.6084,
+          "ae_ratio": 1.0268,
+          "gamma_deviance": -10490.842521,
+          "n_params": 778.0,
+          "training_time": 38.2
+        },
+        {
+          "model": "catboost",
+          "gini_train": 0.3455,
+          "gini_test": 0.3461,
+          "mae": 1165.41,
+          "rmse": 1855.64,
+          "cv_rmse": 0.6104,
+          "ae_ratio": 1.0151,
+          "gamma_deviance": -10545.968021,
+          "n_params": 946.0,
+          "training_time": 135.1
+        },
+        {
+          "model": "cann",
+          "gini_train": 0.3521,
+          "gini_test": 0.3457,
+          "mae": 1168.04,
+          "rmse": 1857.14,
+          "cv_rmse": 0.6109,
+          "ae_ratio": 1.0159,
+          "gamma_deviance": -10608.506085,
+          "n_params": 300519.0,
+          "training_time": 918.3
+        },
+        {
+          "model": "drn",
+          "gini_train": 0.3503,
+          "gini_test": 0.3454,
+          "mae": 1174.7,
+          "rmse": 1861.03,
+          "cv_rmse": 0.6122,
+          "ae_ratio": 1.0043,
+          "gamma_deviance": -10640.272218,
+          "n_params": 300714.0,
+          "training_time": 863.2
+        },
+        {
+          "model": "localglmnet",
+          "gini_train": 0.3485,
+          "gini_test": 0.3428,
+          "mae": 1196.51,
+          "rmse": 1903.44,
+          "cv_rmse": 0.6261,
+          "ae_ratio": 1.008,
+          "gamma_deviance": -10907.573099,
+          "n_params": 193134.0,
+          "training_time": 3502.3
+        },
+        {
+          "model": "tabm",
+          "gini_train": 0.3565,
+          "gini_test": 0.3427,
+          "mae": 1392.63,
+          "rmse": 2445.72,
+          "cv_rmse": 0.8045,
+          "ae_ratio": 1.5535,
+          "gamma_deviance": -18795.918859,
+          "n_params": 1735956.0,
+          "training_time": 3171.0
+        },
+        {
+          "model": "ft_transformer",
+          "gini_train": 0.0268,
+          "gini_test": 0.0279,
+          "mae": 2141.76,
+          "rmse": 3507.74,
+          "cv_rmse": 1.1538,
+          "ae_ratio": 3.0518,
+          "gamma_deviance": -95665.216816,
+          "n_params": 700611.0,
+          "training_time": 13875.2
+        }
+      ],
+      "config": {
+        "seed": 42,
+        "n_tuning_trials": 30,
+        "cv_folds": 5,
+        "quick": false,
+        "architectures": [
+          "catboost",
+          "xgboost",
+          "cann",
+          "cann_gbm",
+          "ft_transformer",
+          "tabm",
+          "localglmnet",
+          "drn"
+        ],
+        "epochs": 300,
+        "patience": 30,
+        "batch_size": 512,
+        "n_ensemble": 3,
+        "catboost_iterations": 2000,
+        "mono_lambda": 0.1
+      },
+      "best_model": "cann_gbm",
+      "glm_gini": 0.20404812297155872,
+      "timestamp": "2026-06-29T00:17:06.382614",
+      "has_interpretability": false,
+      "has_dashboard": true
+    },
+    {
+      "run_id": "bike_sharing_8arch",
+      "dataset": "bike_sharing",
+      "label": "v2 (8 architectures)",
+      "tuned": false,
+      "models": [
+        {
+          "model": "xgboost",
+          "gini_train": 0.5047,
+          "gini_test": 0.4975,
+          "mae": 22.9,
+          "rmse": 38.65,
+          "cv_rmse": 0.2066,
+          "ae_ratio": 1.0072,
+          "gamma_deviance": -346.393599,
+          "n_params": 999.0,
+          "training_time": 1.2
+        },
+        {
+          "model": "stacked_ensemble",
+          "gini_train": 0.5047,
+          "gini_test": 0.4975,
+          "mae": 22.9,
+          "rmse": 38.65,
+          "cv_rmse": 0.2066,
+          "ae_ratio": 1.0072,
+          "gamma_deviance": -346.393599,
+          "n_params": 9.0,
+          "training_time": 0.0
+        },
+        {
+          "model": "catboost",
+          "gini_train": 0.4964,
+          "gini_test": 0.4935,
+          "mae": 29.7,
+          "rmse": 45.87,
+          "cv_rmse": 0.2452,
+          "ae_ratio": 1.0207,
+          "gamma_deviance": -656.121929,
+          "n_params": 583.0,
+          "training_time": 3.3
+        },
+        {
+          "model": "cann_gbm",
+          "gini_train": 0.4905,
+          "gini_test": 0.4876,
+          "mae": 38.99,
+          "rmse": 60.18,
+          "cv_rmse": 0.3217,
+          "ae_ratio": 0.9541,
+          "gamma_deviance": -753.867265,
+          "n_params": 33201.0,
+          "training_time": 29.5
+        },
+        {
+          "model": "localglmnet",
+          "gini_train": 0.3049,
+          "gini_test": 0.3137,
+          "mae": 118.06,
+          "rmse": 166.09,
+          "cv_rmse": 0.8879,
+          "ae_ratio": 0.8935,
+          "gamma_deviance": -3445.93351,
+          "n_params": 11139.0,
+          "training_time": 27.3
+        },
+        {
+          "model": "cann",
+          "gini_train": 0.2992,
+          "gini_test": 0.3085,
+          "mae": 120.68,
+          "rmse": 168.6,
+          "cv_rmse": 0.9013,
+          "ae_ratio": 0.879,
+          "gamma_deviance": -3554.40429,
+          "n_params": 33201.0,
+          "training_time": 29.6
+        },
+        {
+          "model": "drn",
+          "gini_train": 0.2863,
+          "gini_test": 0.2926,
+          "mae": 3819.48,
+          "rmse": 7117.12,
+          "cv_rmse": 38.0448,
+          "ae_ratio": 0.0473,
+          "gamma_deviance": -16641.142936,
+          "n_params": 33396.0,
+          "training_time": 30.6
+        },
+        {
+          "model": "tabm",
+          "gini_train": 0.1783,
+          "gini_test": 0.1628,
+          "mae": 143.12,
+          "rmse": 178.55,
+          "cv_rmse": 0.9544,
+          "ae_ratio": 0.9423,
+          "gamma_deviance": -4904.316278,
+          "n_params": 264414.0,
+          "training_time": 304.4
+        },
+        {
+          "model": "ft_transformer",
+          "gini_train": 0.1488,
+          "gini_test": 0.1236,
+          "mae": 142.74,
+          "rmse": 178.45,
+          "cv_rmse": 0.9539,
+          "ae_ratio": 0.9502,
+          "gamma_deviance": -4901.14156,
+          "n_params": 464067.0,
+          "training_time": 186.6
+        }
+      ],
+      "config": {
+        "seed": 42,
+        "n_tuning_trials": 30,
+        "cv_folds": 5,
+        "quick": false,
+        "architectures": [
+          "catboost",
+          "xgboost",
+          "cann",
+          "cann_gbm",
+          "ft_transformer",
+          "tabm",
+          "localglmnet",
+          "drn"
+        ],
+        "epochs": 300,
+        "patience": 30,
+        "batch_size": 512,
+        "n_ensemble": 3,
+        "catboost_iterations": 2000,
+        "mono_lambda": 0.1
+      },
+      "best_model": "xgboost",
+      "glm_gini": 0.3099130681354837,
+      "timestamp": "2026-06-22T21:50:37.638696",
+      "has_interpretability": false,
+      "has_dashboard": true
+    },
+    {
+      "run_id": "bike_sharing_8arch_interp",
+      "dataset": "bike_sharing",
+      "label": "v3 (interpretability)",
+      "tuned": false,
+      "models": [
+        {
+          "model": "xgboost",
+          "gini_train": 0.5047,
+          "gini_test": 0.4975,
+          "mae": 22.9,
+          "rmse": 38.65,
+          "cv_rmse": 0.2066,
+          "ae_ratio": 1.0072,
+          "gamma_deviance": -346.393599,
+          "n_params": 999.0,
+          "training_time": 3.2
+        },
+        {
+          "model": "stacked_ensemble",
+          "gini_train": 0.5047,
+          "gini_test": 0.4975,
+          "mae": 22.9,
+          "rmse": 38.65,
+          "cv_rmse": 0.2066,
+          "ae_ratio": 1.0072,
+          "gamma_deviance": -346.393599,
+          "n_params": 9.0,
+          "training_time": 0.0
+        },
+        {
+          "model": "catboost",
+          "gini_train": 0.4964,
+          "gini_test": 0.4935,
+          "mae": 29.7,
+          "rmse": 45.87,
+          "cv_rmse": 0.2452,
+          "ae_ratio": 1.0207,
+          "gamma_deviance": -656.121929,
+          "n_params": 583.0,
+          "training_time": 9.4
+        },
+        {
+          "model": "cann_gbm",
+          "gini_train": 0.4905,
+          "gini_test": 0.4876,
+          "mae": 38.99,
+          "rmse": 60.18,
+          "cv_rmse": 0.3217,
+          "ae_ratio": 0.9541,
+          "gamma_deviance": -753.867271,
+          "n_params": 33201.0,
+          "training_time": 79.4
+        },
+        {
+          "model": "localglmnet",
+          "gini_train": 0.3049,
+          "gini_test": 0.3137,
+          "mae": 118.06,
+          "rmse": 166.09,
+          "cv_rmse": 0.8879,
+          "ae_ratio": 0.8935,
+          "gamma_deviance": -3445.93351,
+          "n_params": 11139.0,
+          "training_time": 34.5
+        },
+        {
+          "model": "cann",
+          "gini_train": 0.2992,
+          "gini_test": 0.3085,
+          "mae": 120.68,
+          "rmse": 168.6,
+          "cv_rmse": 0.9013,
+          "ae_ratio": 0.879,
+          "gamma_deviance": -3554.404293,
+          "n_params": 33201.0,
+          "training_time": 78.1
+        },
+        {
+          "model": "drn",
+          "gini_train": 0.2863,
+          "gini_test": 0.2926,
+          "mae": 3819.45,
+          "rmse": 7117.09,
+          "cv_rmse": 38.0446,
+          "ae_ratio": 0.0473,
+          "gamma_deviance": -16641.463542,
+          "n_params": 33396.0,
+          "training_time": 36.8
+        },
+        {
+          "model": "tabm",
+          "gini_train": 0.1783,
+          "gini_test": 0.1627,
+          "mae": 143.12,
+          "rmse": 178.55,
+          "cv_rmse": 0.9544,
+          "ae_ratio": 0.9423,
+          "gamma_deviance": -4904.316554,
+          "n_params": 264414.0,
+          "training_time": 366.7
+        },
+        {
+          "model": "ft_transformer",
+          "gini_train": 0.1488,
+          "gini_test": 0.1235,
+          "mae": 142.74,
+          "rmse": 178.45,
+          "cv_rmse": 0.9539,
+          "ae_ratio": 0.9502,
+          "gamma_deviance": -4901.141568,
+          "n_params": 464067.0,
+          "training_time": 329.1
+        }
+      ],
+      "config": {
+        "seed": 42,
+        "n_tuning_trials": 30,
+        "cv_folds": 5,
+        "quick": false,
+        "architectures": [
+          "catboost",
+          "xgboost",
+          "cann",
+          "cann_gbm",
+          "ft_transformer",
+          "tabm",
+          "localglmnet",
+          "drn"
+        ],
+        "epochs": 300,
+        "patience": 30,
+        "batch_size": 512,
+        "n_ensemble": 3,
+        "catboost_iterations": 2000,
+        "mono_lambda": 0.1
+      },
+      "best_model": "xgboost",
+      "glm_gini": 0.3099130681354837,
+      "timestamp": "2026-06-29T20:53:28.996202",
+      "has_interpretability": true,
+      "has_dashboard": true,
+      "feature_importance": {
+        "catboost": {
+          "hr": 0.8823763560167626,
+          "yr": 0.2322143056426812,
+          "temp": 0.1642483508073512,
+          "workingday": 0.1317591070629093,
+          "season": 0.103989726200838,
+          "atemp": 0.0764012590371557,
+          "hum": 0.072897563369796,
+          "mnth": 0.0718089493567603,
+          "weathersit": 0.0623542159587071,
+          "windspeed": 0.0091706432626494,
+          "weekday": 0.0084784161224761,
+          "holiday": 0.0064416051072902
+        },
+        "xgboost": {
+          "hr": 0.8653227686882019,
+          "yr": 0.2213387936353683,
+          "temp": 0.1957901269197464,
+          "workingday": 0.1446611881256103,
+          "season": 0.1007149368524551,
+          "hum": 0.0716432556509971,
+          "weathersit": 0.0563532039523124,
+          "weekday": 0.053725779056549,
+          "mnth": 0.0507041066884994,
+          "atemp": 0.0483270399272441,
+          "windspeed": 0.0220878552645444,
+          "holiday": 0.0071953730657696
+        }
+      },
+      "localglmnet_coef_summary": {
+        "temp": {
+          "mean": 0.01108543474228,
+          "std": 0.006722818961928027,
+          "sign_stability": 0.974
+        },
+        "atemp": {
+          "mean": 0.01093295860556,
+          "std": 0.006540086564410232,
+          "sign_stability": 0.972
+        },
+        "hum": {
+          "mean": -0.01268136982808,
+          "std": 0.0072929672270739525,
+          "sign_stability": 0.992
+        },
+        "windspeed": {
+          "mean": 0.0077117711486260005,
+          "std": 0.006803368156811754,
+          "sign_stability": 0.9
+        },
+        "hr": {
+          "mean": 0.01384586319,
+          "std": 0.0060626512778317095,
+          "sign_stability": 0.998
+        },
+        "yr": {
+          "mean": 0.0033721714981003997,
+          "std": 0.00526327631258301,
+          "sign_stability": 0.724
+        },
+        "mnth": {
+          "mean": -0.0024129571913354,
+          "std": 0.006484195324333957,
+          "sign_stability": 0.61
+        },
+        "temp_raw": {
+          "mean": 0.0575994986524,
+          "std": 0.03493151244520351,
+          "sign_stability": 0.974
+        },
+        "atemp_raw": {
+          "mean": 0.0636643418412,
+          "std": 0.038083955230270326,
+          "sign_stability": 0.972
+        },
+        "hum_raw": {
+          "mean": -0.0658494313895,
+          "std": 0.03786954805966977,
+          "sign_stability": 0.992
+        },
+        "windspeed_raw": {
+          "mean": 0.06282523723218,
+          "std": 0.0554247799233693,
+          "sign_stability": 0.9
+        },
+        "hr_raw": {
+          "mean": 0.00200308162886,
+          "std": 0.0008770840318934318,
+          "sign_stability": 0.998
+        },
+        "yr_raw": {
+          "mean": 0.006744381627407801,
+          "std": 0.010526612896874912,
+          "sign_stability": 0.724
+        },
+        "mnth_raw": {
+          "mean": -0.0007007946548788,
+          "std": 0.0018832035016538586,
+          "sign_stability": 0.61
+        }
+      }
+    },
+    {
+      "run_id": "bike_sharing_baseline",
+      "dataset": "bike_sharing",
+      "label": "v1 (GBM baseline)",
+      "tuned": false,
+      "models": [
+        {
+          "model": "xgboost",
+          "gini_train": 0.5047,
+          "gini_test": 0.4975,
+          "mae": 22.9,
+          "rmse": 38.65,
+          "cv_rmse": 0.2066,
+          "ae_ratio": 1.0072,
+          "gamma_deviance": -346.393599,
+          "n_params": 999.0,
+          "training_time": 1.3
+        },
+        {
+          "model": "stacked_ensemble",
+          "gini_train": 0.5047,
+          "gini_test": 0.4975,
+          "mae": 22.9,
+          "rmse": 38.65,
+          "cv_rmse": 0.2066,
+          "ae_ratio": 1.0072,
+          "gamma_deviance": -346.393599,
+          "n_params": 3.0,
+          "training_time": 0.0
+        },
+        {
+          "model": "catboost",
+          "gini_train": 0.4964,
+          "gini_test": 0.4935,
+          "mae": 29.7,
+          "rmse": 45.87,
+          "cv_rmse": 0.2452,
+          "ae_ratio": 1.0207,
+          "gamma_deviance": -656.121929,
+          "n_params": 583.0,
+          "training_time": 3.1
+        }
+      ],
+      "config": {
+        "seed": 42,
+        "n_tuning_trials": 30,
+        "cv_folds": 5,
+        "quick": false,
+        "architectures": [
+          "catboost",
+          "xgboost"
+        ],
+        "epochs": 300,
+        "patience": 30,
+        "batch_size": 512,
+        "n_ensemble": 3,
+        "catboost_iterations": 2000,
+        "mono_lambda": 0.1
+      },
+      "best_model": "xgboost",
+      "glm_gini": -0.09098226893304218,
+      "timestamp": "2026-05-27T22:47:20.440174",
+      "has_interpretability": false,
+      "has_dashboard": true
+    },
+    {
+      "run_id": "dl_results",
+      "dataset": "net_premium",
+      "label": "dl_results",
+      "tuned": false,
+      "models": [
+        {
+          "model": "localglmnet",
+          "gini_train": 0.3073,
+          "gini_test": 0.3296,
+          "mae": 516.59,
+          "rmse": 1216.87,
+          "cv_rmse": 1.1673,
+          "ae_ratio": 1.0441,
+          "gamma_deviance": -2295.509723,
+          "n_params": 18510.0,
+          "training_time": 95.3
+        },
+        {
+          "model": "stacked_ensemble",
+          "gini_train": 0.3072,
+          "gini_test": 0.3295,
+          "mae": 512.43,
+          "rmse": 1218.03,
+          "cv_rmse": 1.1684,
+          "ae_ratio": 1.0591,
+          "gamma_deviance": -2297.485617,
+          "n_params": 2.0,
+          "training_time": 0.0
+        }
+      ],
+      "config": {
+        "seed": 42,
+        "n_tuning_trials": 30,
+        "cv_folds": 5,
+        "quick": false,
+        "architectures": [
+          "localglmnet"
+        ],
+        "epochs": 500,
+        "patience": 30,
+        "batch_size": 512,
+        "n_ensemble": 3,
+        "catboost_iterations": 2000,
+        "mono_lambda": 0.1
+      },
+      "best_model": "localglmnet",
+      "glm_gini": 0.3291,
+      "timestamp": "2026-03-05T18:03:15.413049",
+      "has_interpretability": true,
+      "has_dashboard": true,
+      "feature_importance": {
+        "catboost": {
+          "CREDIT_SCORE": 180.12502363702544,
+          "LICENCEHELD_YEARS": 135.34390876731402,
+          "AGE_X_NCD": 119.98554194133928,
+          "MILEAGE_K": 80.49808016569003,
+          "RISK_AREA": 79.19116866921138,
+          "VEHICLE_AGE": 69.04927695800677,
+          "NCD_CAPPED": 65.9526035268138,
+          "UKRESIDENCY_YEARS": 65.5904745900835,
+          "GROSSVEHICLEWEIGHT_K": 54.317663059368755,
+          "LOG_VEHICLE_VALUE": 34.90814604765936,
+          "DD_DUQ": 30.128049632322693,
+          "ENGINE_SIZE": 29.322927471981068,
+          "NCD_RATE": 27.769766153178978,
+          "AGE_SQUARED": 26.92302457165216,
+          "EXPERIENCE_RATIO": 23.111554030796427,
+          "CLM_GROUP": 23.006689693857837,
+          "DTI": 22.172960030175,
+          "VEHICLE_VALUE": 20.626873348122036,
+          "AGE": 20.137606018091255,
+          "CONVICTIONS_FLAG": 19.09708320539485,
+          "CLASSOFUSEDESC": 15.89739458189575,
+          "NUMBER_OF_DRIVERS": 15.668399280012473,
+          "OVERNIGHT_LOCATION": 13.309178533098544,
+          "NCDPROTECT": 9.480256681343745,
+          "MONTHOFINCEPTION": 9.040049241604043,
+          "COVER_TYPE": 3.4946242737329953,
+          "LICENCE_TYPE": 0.3714948136499983,
+          "CLM_NUM_L5Y": 0.0208028067796709,
+          "FUEL_TYPE_CAT": 0.0
+        },
+        "xgboost": {
+          "NCD_CAPPED": 0.177694633603096,
+          "AGE_X_NCD": 0.1546958684921264,
+          "CREDIT_SCORE": 0.1108211949467659,
+          "LICENCEHELD_YEARS": 0.092514544725418,
+          "MILEAGE_K": 0.0712853372097015,
+          "VEHICLE_AGE": 0.0297336652874946,
+          "VEHICLE_VALUE": 0.0282973535358905,
+          "RISK_AREA": 0.0274688638746738,
+          "UKRESIDENCY_YEARS": 0.0271409675478935,
+          "CONVICTIONS_FLAG": 0.0244568046182394,
+          "GROSSVEHICLEWEIGHT_K": 0.0224321633577346,
+          "CLM_NUM_L5Y": 0.0198784209787845,
+          "DD_DUQ": 0.0188075695186853,
+          "NUMBER_OF_DRIVERS": 0.0187333356589078,
+          "COVER_TYPE": 0.0159303527325391,
+          "ENGINE_SIZE": 0.0145800001919269,
+          "LOG_VEHICLE_VALUE": 0.014516626484692,
+          "CLASSOFUSEDESC": 0.0134435016661882,
+          "DTI": 0.0129846818745136,
+          "EXPERIENCE_RATIO": 0.0125338891521096,
+          "CLM_GROUP": 0.0124248703941702,
+          "AGE": 0.0119791449978947,
+          "NCDPROTECT": 0.011710025370121,
+          "OVERNIGHT_LOCATION": 0.0110838580876588,
+          "NCD_RATE": 0.0106019843369722,
+          "LICENCE_TYPE": 0.0102587472647428,
+          "AGE_SQUARED": 0.0099695799872279,
+          "MONTHOFINCEPTION": 0.0092915510758757,
+          "FUEL_TYPE_CAT": 0.0047304271720349
+        }
+      },
+      "localglmnet_coef_summary": {
+        "AGE": {
+          "mean": -0.0007155670467146799,
+          "std": 0.0035094395921665337,
+          "sign_stability": 0.76
+        },
+        "CREDIT_SCORE": {
+          "mean": -0.006579259547200001,
+          "std": 0.00493277744822281,
+          "sign_stability": 1.0
+        },
+        "VEHICLE_VALUE": {
+          "mean": 0.0008263019069507999,
+          "std": 0.0016463844431233718,
+          "sign_stability": 0.722
+        },
+        "ENGINE_SIZE": {
+          "mean": 0.0021107811458069997,
+          "std": 0.0038754866774312153,
+          "sign_stability": 0.844
+        },
+        "MILEAGE_K": {
+          "mean": 0.00483474765698,
+          "std": 0.0036113195435086803,
+          "sign_stability": 0.998
+        },
+        "NCD_CAPPED": {
+          "mean": -0.0048350755296000004,
+          "std": 0.00257822679167985,
+          "sign_stability": 1.0
+        },
+        "VEHICLE_AGE": {
+          "mean": 0.00264295210369,
+          "std": 0.002906134516751226,
+          "sign_stability": 0.966
+        },
+        "LICENCEHELD_YEARS": {
+          "mean": -0.00545891170044,
+          "std": 0.005200433514865252,
+          "sign_stability": 1.0
+        },
+        "UKRESIDENCY_YEARS": {
+          "mean": -0.001541318312526,
+          "std": 0.004279319403799549,
+          "sign_stability": 0.832
+        },
+        "CLM_NUM_L5Y": {
+          "mean": 0.0058336817967,
+          "std": 0.004873469910883912,
+          "sign_stability": 1.0
+        },
+        "DTI": {
+          "mean": 0.00063229366925488,
+          "std": 0.003247887209981523,
+          "sign_stability": 0.578
+        },
+        "NUMBER_OF_DRIVERS": {
+          "mean": 0.0007013663226461599,
+          "std": 0.0019235509635316095,
+          "sign_stability": 0.684
+        },
+        "OVERNIGHT_LOCATION": {
+          "mean": 0.0015975352079534,
+          "std": 0.0017854868529671797,
+          "sign_stability": 0.878
+        },
+        "LICENCE_TYPE": {
+          "mean": 0.003505015678642,
+          "std": 0.005385241168981546,
+          "sign_stability": 0.904
+        },
+        "MONTHOFINCEPTION": {
+          "mean": 0.0036934542555593993,
+          "std": 0.005224866286888594,
+          "sign_stability": 0.974
+        },
+        "GROSSVEHICLEWEIGHT_K": {
+          "mean": -0.0017631678701056001,
+          "std": 0.0010258697067766695,
+          "sign_stability": 0.982
+        },
+        "AGE_SQUARED": {
+          "mean": -0.0009105278426979999,
+          "std": 0.003632493126644101,
+          "sign_stability": 0.772
+        },
+        "AGE_X_NCD": {
+          "mean": -0.003524976545888,
+          "std": 0.0011590542495157304,
+          "sign_stability": 0.998
+        },
+        "LOG_VEHICLE_VALUE": {
+          "mean": -0.00067922081703,
+          "std": 0.0008926586354195391,
+          "sign_stability": 0.836
+        },
+        "EXPERIENCE_RATIO": {
+          "mean": 0.001533956829804,
+          "std": 0.003192402408594492,
+          "sign_stability": 0.794
+        },
+        "NCD_RATE": {
+          "mean": 0.0019928124691208,
+          "std": 0.0037888479102876934,
+          "sign_stability": 0.808
+        },
+        "AGE_raw": {
+          "mean": -5.2131930259580006e-05,
+          "std": 0.0002556767712836188,
+          "sign_stability": 0.76
+        },
+        "CREDIT_SCORE_raw": {
+          "mean": -5.3739880086e-05,
+          "std": 4.02912923288388e-05,
+          "sign_stability": 1.0
+        },
+        "VEHICLE_VALUE_raw": {
+          "mean": 1.1525988806634001e-07,
+          "std": 2.2965224443001296e-07,
+          "sign_stability": 0.722
+        },
+        "ENGINE_SIZE_raw": {
+          "mean": 0.005020029642681999,
+          "std": 0.009216994271275817,
+          "sign_stability": 0.844
+        },
+        "MILEAGE_K_raw": {
+          "mean": 0.0005498552915199999,
+          "std": 0.00041071494410509153,
+          "sign_stability": 0.998
+        },
+        "NCD_CAPPED_raw": {
+          "mean": -0.0014284340390199998,
+          "std": 0.0007616896162513034,
+          "sign_stability": 1.0
+        },
+        "VEHICLE_AGE_raw": {
+          "mean": 0.0004971169739956,
+          "std": 0.0005466193748115369,
+          "sign_stability": 0.966
+        },
+        "LICENCEHELD_YEARS_raw": {
+          "mean": -0.000574237093326,
+          "std": 0.0005470470959018272,
+          "sign_stability": 1.0
+        },
+        "UKRESIDENCY_YEARS_raw": {
+          "mean": -9.75477518778e-05,
+          "std": 0.00027083177771223215,
+          "sign_stability": 0.832
+        },
+        "CLM_NUM_L5Y_raw": {
+          "mean": 0.00873474649984,
+          "std": 0.007297025051161964,
+          "sign_stability": 1.0
+        },
+        "DTI_raw": {
+          "mean": 5.389790318701e-05,
+          "std": 0.0002768560270364263,
+          "sign_stability": 0.578
+        },
+        "NUMBER_OF_DRIVERS_raw": {
+          "mean": 0.0011360488151466,
+          "std": 0.003115701022014638,
+          "sign_stability": 0.684
+        },
+        "OVERNIGHT_LOCATION_raw": {
+          "mean": 0.0009690470227816001,
+          "std": 0.0010830563777498102,
+          "sign_stability": 0.878
+        },
+        "LICENCE_TYPE_raw": {
+          "mean": 0.137767099461,
+          "std": 0.21167068225333416,
+          "sign_stability": 0.904
+        },
+        "MONTHOFINCEPTION_raw": {
+          "mean": 0.0026088708635566,
+          "std": 0.0036905835301976352,
+          "sign_stability": 0.974
+        },
+        "GROSSVEHICLEWEIGHT_K_raw": {
+          "mean": -0.0025066320571288,
+          "std": 0.0014584419091186697,
+          "sign_stability": 0.982
+        },
+        "AGE_SQUARED_raw": {
+          "mean": -6.993183315319999e-07,
+          "std": 2.7898862638763267e-06,
+          "sign_stability": 0.772
+        },
+        "AGE_X_NCD_raw": {
+          "mean": -1.8418466643899996e-05,
+          "std": 6.056211076609036e-06,
+          "sign_stability": 0.998
+        },
+        "LOG_VEHICLE_VALUE_raw": {
+          "mean": -0.0006179983964268,
+          "std": 0.0008121977288023688,
+          "sign_stability": 0.836
+        },
+        "EXPERIENCE_RATIO_raw": {
+          "mean": 0.001403063727696,
+          "std": 0.0029199935645596504,
+          "sign_stability": 0.794
+        },
+        "NCD_RATE_raw": {
+          "mean": 0.0047505181566784,
+          "std": 0.009031954127380983,
+          "sign_stability": 0.808
+        }
+      }
+    },
+    {
+      "run_id": "dl_results_8arch",
+      "dataset": "net_premium",
+      "label": "v2 (8 architectures)",
+      "tuned": false,
+      "models": [
+        {
+          "model": "stacked_ensemble",
+          "gini_train": 0.3723,
+          "gini_test": 0.3617,
+          "mae": 435.55,
+          "rmse": 1107.33,
+          "cv_rmse": 1.0622,
+          "ae_ratio": 1.0929,
+          "gamma_deviance": -1817.309829,
+          "n_params": 9.0,
+          "training_time": 0.0
+        },
+        {
+          "model": "xgboost",
+          "gini_train": 0.3784,
+          "gini_test": 0.3606,
+          "mae": 432.56,
+          "rmse": 1115.53,
+          "cv_rmse": 1.0701,
+          "ae_ratio": 1.1149,
+          "gamma_deviance": -1856.527274,
+          "n_params": 370.0,
+          "training_time": 0.9
+        },
+        {
+          "model": "catboost",
+          "gini_train": 0.36,
+          "gini_test": 0.3592,
+          "mae": 446.28,
+          "rmse": 1104.47,
+          "cv_rmse": 1.0595,
+          "ae_ratio": 1.0663,
+          "gamma_deviance": -1841.365328,
+          "n_params": 1999.0,
+          "training_time": 12.1
+        },
+        {
+          "model": "cann_gbm",
+          "gini_train": 0.354,
+          "gini_test": 0.3545,
+          "mae": 461.86,
+          "rmse": 1127.94,
+          "cv_rmse": 1.082,
+          "ae_ratio": 1.0419,
+          "gamma_deviance": -1917.473848,
+          "n_params": 162450.0,
+          "training_time": 108.7
+        },
+        {
+          "model": "localglmnet",
+          "gini_train": 0.307,
+          "gini_test": 0.3292,
+          "mae": 516.85,
+          "rmse": 1220.28,
+          "cv_rmse": 1.1706,
+          "ae_ratio": 1.0485,
+          "gamma_deviance": -2298.865274,
+          "n_params": 18510.0,
+          "training_time": 177.2
+        },
+        {
+          "model": "cann",
+          "gini_train": 0.2996,
+          "gini_test": 0.3232,
+          "mae": 534.58,
+          "rmse": 1239.18,
+          "cv_rmse": 1.1887,
+          "ae_ratio": 1.027,
+          "gamma_deviance": -2381.959824,
+          "n_params": 162450.0,
+          "training_time": 107.1
+        },
+        {
+          "model": "drn",
+          "gini_train": 0.2982,
+          "gini_test": 0.3172,
+          "mae": 558.36,
+          "rmse": 1216.58,
+          "cv_rmse": 1.167,
+          "ae_ratio": 0.9921,
+          "gamma_deviance": -2907.801308,
+          "n_params": 44757.0,
+          "training_time": 196.1
+        },
+        {
+          "model": "ft_transformer",
+          "gini_train": -0.032,
+          "gini_test": -0.0129,
+          "mae": 675.19,
+          "rmse": 1423.67,
+          "cv_rmse": 1.3657,
+          "ae_ratio": 1.0768,
+          "gamma_deviance": -4403.697539,
+          "n_params": 474819.0,
+          "training_time": 7538.1
+        },
+        {
+          "model": "tabm",
+          "gini_train": -0.0708,
+          "gini_test": -0.0903,
+          "mae": 678.65,
+          "rmse": 1423.27,
+          "cv_rmse": 1.3653,
+          "ae_ratio": 1.0677,
+          "gamma_deviance": -4396.151643,
+          "n_params": 351039.0,
+          "training_time": 3047.1
+        }
+      ],
+      "config": {
+        "seed": 42,
+        "n_tuning_trials": 30,
+        "cv_folds": 5,
+        "quick": false,
+        "architectures": [
+          "catboost",
+          "xgboost",
+          "cann",
+          "cann_gbm",
+          "ft_transformer",
+          "tabm",
+          "localglmnet",
+          "drn"
+        ],
+        "epochs": 500,
+        "patience": 30,
+        "batch_size": 512,
+        "n_ensemble": 3,
+        "catboost_iterations": 2000,
+        "mono_lambda": 0.1
+      },
+      "best_model": "stacked_ensemble",
+      "glm_gini": 0.3291,
+      "timestamp": "2026-03-05T23:38:31.113260",
+      "has_interpretability": true,
+      "has_dashboard": true,
+      "feature_importance": {
+        "catboost": {
+          "CREDIT_SCORE": 178.99408754543265,
+          "LICENCEHELD_YEARS": 140.19163786057214,
+          "AGE_X_NCD": 119.53005138221334,
+          "RISK_AREA": 83.99928779462755,
+          "MILEAGE_K": 82.27605172780785,
+          "VEHICLE_AGE": 68.20733549511976,
+          "NCD_CAPPED": 68.16261466773621,
+          "UKRESIDENCY_YEARS": 55.323149211031655,
+          "GROSSVEHICLEWEIGHT_K": 53.96760573967343,
+          "LOG_VEHICLE_VALUE": 40.04395929250566,
+          "ENGINE_SIZE": 27.23663328652258,
+          "AGE": 27.13934436500064,
+          "CONVICTIONS_FLAG": 27.065953688486285,
+          "NCD_RATE": 25.052344414119226,
+          "DD_DUQ": 22.66141670503055,
+          "EXPERIENCE_RATIO": 21.479449741195456,
+          "DTI": 21.072432430830236,
+          "VEHICLE_VALUE": 20.76952637888797,
+          "CLM_GROUP": 19.72174433729883,
+          "CLASSOFUSEDESC": 15.140149519715152,
+          "NUMBER_OF_DRIVERS": 13.833403495584484,
+          "OVERNIGHT_LOCATION": 12.045793676628776,
+          "AGE_SQUARED": 10.848935453042806,
+          "NCDPROTECT": 8.632798002747974,
+          "MONTHOFINCEPTION": 7.360151891500604,
+          "COVER_TYPE": 3.9057398358624833,
+          "LICENCE_TYPE": 1.1423587187220074,
+          "CLM_NUM_L5Y": 0.6961907440203455,
+          "FUEL_TYPE_CAT": 0.0111322735550993
+        },
+        "xgboost": {
+          "AGE_X_NCD": 0.2019590735435485,
+          "LICENCEHELD_YEARS": 0.0961318239569664,
+          "CREDIT_SCORE": 0.0857693776488304,
+          "NCD_CAPPED": 0.0826859250664711,
+          "MILEAGE_K": 0.060816578567028,
+          "VEHICLE_AGE": 0.037698246538639,
+          "UKRESIDENCY_YEARS": 0.0331159830093383,
+          "RISK_AREA": 0.0308042634278535,
+          "CONVICTIONS_FLAG": 0.029810918495059,
+          "GROSSVEHICLEWEIGHT_K": 0.0264379270374774,
+          "VEHICLE_VALUE": 0.0256664678454399,
+          "CLM_NUM_L5Y": 0.0251973830163478,
+          "DD_DUQ": 0.0227578058838844,
+          "NUMBER_OF_DRIVERS": 0.0225924160331487,
+          "LOG_VEHICLE_VALUE": 0.0201135799288749,
+          "EXPERIENCE_RATIO": 0.01733841560781,
+          "DTI": 0.016226278617978,
+          "ENGINE_SIZE": 0.0161177143454551,
+          "NCDPROTECT": 0.0156260840594768,
+          "COVER_TYPE": 0.0156148271635174,
+          "CLASSOFUSEDESC": 0.0154792582616209,
+          "CLM_GROUP": 0.0142843332141637,
+          "LICENCE_TYPE": 0.0136294420808553,
+          "NCD_RATE": 0.0134605076164007,
+          "OVERNIGHT_LOCATION": 0.0133400624617934,
+          "AGE_SQUARED": 0.0129149435088038,
+          "AGE": 0.0122802937403321,
+          "FUEL_TYPE_CAT": 0.0112819811329245,
+          "MONTHOFINCEPTION": 0.0108480136841535
+        }
+      },
+      "localglmnet_coef_summary": {
+        "AGE": {
+          "mean": -0.003794277199,
+          "std": 0.0016678742387389442,
+          "sign_stability": 1.0
+        },
+        "CREDIT_SCORE": {
+          "mean": -0.002606724864616,
+          "std": 0.0018961172462118529,
+          "sign_stability": 0.994
+        },
+        "VEHICLE_VALUE": {
+          "mean": 0.00043078244818080003,
+          "std": 0.001426454607201031,
+          "sign_stability": 0.576
+        },
+        "ENGINE_SIZE": {
+          "mean": -0.0027505729699039997,
+          "std": 0.003590988721011182,
+          "sign_stability": 0.998
+        },
+        "MILEAGE_K": {
+          "mean": 0.0020763685056319997,
+          "std": 0.0013117780327348014,
+          "sign_stability": 0.968
+        },
+        "NCD_CAPPED": {
+          "mean": -0.001324727183836,
+          "std": 0.001379811555250799,
+          "sign_stability": 0.912
+        },
+        "VEHICLE_AGE": {
+          "mean": -0.000293037062681514,
+          "std": 0.0026077916204999847,
+          "sign_stability": 0.47
+        },
+        "LICENCEHELD_YEARS": {
+          "mean": -0.004406924692580001,
+          "std": 0.0037289695812581175,
+          "sign_stability": 1.0
+        },
+        "UKRESIDENCY_YEARS": {
+          "mean": -0.003294804648166,
+          "std": 0.003024046098124901,
+          "sign_stability": 0.968
+        },
+        "CLM_NUM_L5Y": {
+          "mean": 0.004418837510700001,
+          "std": 0.0042552116272429235,
+          "sign_stability": 1.0
+        },
+        "DTI": {
+          "mean": -0.0016029225906590001,
+          "std": 0.0037653345959700007,
+          "sign_stability": 0.794
+        },
+        "NUMBER_OF_DRIVERS": {
+          "mean": 0.004413262509538,
+          "std": 0.004748982290534861,
+          "sign_stability": 0.996
+        },
+        "OVERNIGHT_LOCATION": {
+          "mean": 0.0025099759611800004,
+          "std": 0.0022548046855441367,
+          "sign_stability": 0.996
+        },
+        "LICENCE_TYPE": {
+          "mean": 0.0018830706807892,
+          "std": 0.002883163693156984,
+          "sign_stability": 0.826
+        },
+        "MONTHOFINCEPTION": {
+          "mean": 0.000348216812644,
+          "std": 0.0024343666024767576,
+          "sign_stability": 0.524
+        },
+        "GROSSVEHICLEWEIGHT_K": {
+          "mean": -0.0011494824168660001,
+          "std": 0.0013862476534032369,
+          "sign_stability": 0.886
+        },
+        "AGE_SQUARED": {
+          "mean": -0.0038374173832,
+          "std": 0.0016267471927688363,
+          "sign_stability": 1.0
+        },
+        "AGE_X_NCD": {
+          "mean": -0.0019550713884716,
+          "std": 0.001755946822055905,
+          "sign_stability": 0.972
+        },
+        "LOG_VEHICLE_VALUE": {
+          "mean": -0.00126256973368684,
+          "std": 0.0018501683870431032,
+          "sign_stability": 0.902
+        },
+        "EXPERIENCE_RATIO": {
+          "mean": 0.0011955676995543,
+          "std": 0.00500548231060613,
+          "sign_stability": 0.614
+        },
+        "NCD_RATE": {
+          "mean": 0.003477882372058,
+          "std": 0.005035790614783468,
+          "sign_stability": 0.998
+        },
+        "AGE_raw": {
+          "mean": -0.00027642831846,
+          "std": 0.00012151133369321822,
+          "sign_stability": 1.0
+        },
+        "CREDIT_SCORE_raw": {
+          "mean": -2.129192205624e-05,
+          "std": 1.54876260871019e-05,
+          "sign_stability": 0.994
+        },
+        "VEHICLE_VALUE_raw": {
+          "mean": 6.008934038676e-08,
+          "std": 1.989744840078732e-07,
+          "sign_stability": 0.576
+        },
+        "ENGINE_SIZE_raw": {
+          "mean": -0.006541634077699999,
+          "std": 0.008540378525244892,
+          "sign_stability": 0.998
+        },
+        "MILEAGE_K_raw": {
+          "mean": 0.00023614515092460002,
+          "std": 0.00014918836461760872,
+          "sign_stability": 0.968
+        },
+        "NCD_CAPPED_raw": {
+          "mean": -0.000391366255701,
+          "std": 0.0004076399203431854,
+          "sign_stability": 0.912
+        },
+        "VEHICLE_AGE_raw": {
+          "mean": -5.5117797452298803e-05,
+          "std": 0.0004905035891339395,
+          "sign_stability": 0.47
+        },
+        "LICENCEHELD_YEARS_raw": {
+          "mean": -0.00046357584878400004,
+          "std": 0.000392259981322031,
+          "sign_stability": 1.0
+        },
+        "UKRESIDENCY_YEARS_raw": {
+          "mean": -0.00020852330333699998,
+          "std": 0.00019138739769708558,
+          "sign_stability": 0.968
+        },
+        "CLM_NUM_L5Y_raw": {
+          "mean": 0.006616306274239999,
+          "std": 0.0063713100813577155,
+          "sign_stability": 1.0
+        },
+        "DTI_raw": {
+          "mean": -0.000136636140106,
+          "std": 0.00032096421764398603,
+          "sign_stability": 0.794
+        },
+        "NUMBER_OF_DRIVERS_raw": {
+          "mean": 0.007148449299975001,
+          "std": 0.007692236657893505,
+          "sign_stability": 0.996
+        },
+        "OVERNIGHT_LOCATION_raw": {
+          "mean": 0.0015225233933999999,
+          "std": 0.0013677393303108353,
+          "sign_stability": 0.996
+        },
+        "LICENCE_TYPE_raw": {
+          "mean": 0.07401541342100401,
+          "std": 0.11332477231211767,
+          "sign_stability": 0.826
+        },
+        "MONTHOFINCEPTION_raw": {
+          "mean": 0.0002459628953166,
+          "std": 0.001719514456673194,
+          "sign_stability": 0.524
+        },
+        "GROSSVEHICLEWEIGHT_K_raw": {
+          "mean": -0.0016341776153279998,
+          "std": 0.0019707781737146896,
+          "sign_stability": 0.886
+        },
+        "AGE_SQUARED_raw": {
+          "mean": -2.9472754376000007e-06,
+          "std": 1.2494007107303428e-06,
+          "sign_stability": 1.0
+        },
+        "AGE_X_NCD_raw": {
+          "mean": -1.0215505479243999e-05,
+          "std": 9.175053667737864e-06,
+          "sign_stability": 0.972
+        },
+        "LOG_VEHICLE_VALUE_raw": {
+          "mean": -0.0011487664293751,
+          "std": 0.001683401173574411,
+          "sign_stability": 0.902
+        },
+        "EXPERIENCE_RATIO_raw": {
+          "mean": 0.0010935494572424,
+          "std": 0.004578362596278767,
+          "sign_stability": 0.614
+        },
+        "NCD_RATE_raw": {
+          "mean": 0.008290666403270001,
+          "std": 0.012004448564429475,
+          "sign_stability": 0.998
+        }
+      }
+    },
+    {
+      "run_id": "house_prices_8arch",
+      "dataset": "house_prices",
+      "label": "v2 (8 architectures)",
+      "tuned": false,
+      "models": [
+        {
+          "model": "xgboost",
+          "gini_train": 0.2212,
+          "gini_test": 0.2049,
+          "mae": 17203.89,
+          "rmse": 29715.99,
+          "cv_rmse": 0.1582,
+          "ae_ratio": 0.9985,
+          "gamma_deviance": -4.691965,
+          "n_params": 462.0,
+          "training_time": 0.3
+        },
+        {
+          "model": "stacked_ensemble",
+          "gini_train": 0.2212,
+          "gini_test": 0.2049,
+          "mae": 17203.89,
+          "rmse": 29715.99,
+          "cv_rmse": 0.1582,
+          "ae_ratio": 0.9985,
+          "gamma_deviance": -4.691965,
+          "n_params": 9.0,
+          "training_time": 0.0
+        },
+        {
+          "model": "catboost",
+          "gini_train": 0.2172,
+          "gini_test": 0.1996,
+          "mae": 29223.45,
+          "rmse": 42466.58,
+          "cv_rmse": 0.2261,
+          "ae_ratio": 1.1608,
+          "gamma_deviance": -14.947891,
+          "n_params": 499.0,
+          "training_time": 2.1
+        },
+        {
+          "model": "localglmnet",
+          "gini_train": 0.206,
+          "gini_test": 0.1991,
+          "mae": 23419.59,
+          "rmse": 41406.01,
+          "cv_rmse": 0.2204,
+          "ae_ratio": 0.9881,
+          "gamma_deviance": -7.820823,
+          "n_params": 22620.0,
+          "training_time": 4.5
+        },
+        {
+          "model": "drn",
+          "gini_train": 0.2021,
+          "gini_test": 0.1962,
+          "mae": 27927.62,
+          "rmse": 50086.19,
+          "cv_rmse": 0.2667,
+          "ae_ratio": 0.9813,
+          "gamma_deviance": -10.697358,
+          "n_params": 53010.0,
+          "training_time": 4.8
+        },
+        {
+          "model": "cann",
+          "gini_train": 0.2024,
+          "gini_test": 0.1941,
+          "mae": 24906.06,
+          "rmse": 40934.77,
+          "cv_rmse": 0.2179,
+          "ae_ratio": 1.0241,
+          "gamma_deviance": -9.638748,
+          "n_params": 52815.0,
+          "training_time": 8.2
+        },
+        {
+          "model": "cann_gbm",
+          "gini_train": 0.215,
+          "gini_test": 0.194,
+          "mae": 32932.2,
+          "rmse": 48574.48,
+          "cv_rmse": 0.2586,
+          "ae_ratio": 1.193,
+          "gamma_deviance": -20.046702,
+          "n_params": 52815.0,
+          "training_time": 4.2
+        },
+        {
+          "model": "ft_transformer",
+          "gini_train": 0.0593,
+          "gini_test": 0.0368,
+          "mae": 187771.09,
+          "rmse": 203270.26,
+          "cv_rmse": 1.0822,
+          "ae_ratio": 3337.2602,
+          "gamma_deviance": -2023550.169534,
+          "n_params": 483267.0,
+          "training_time": 171.7
+        },
+        {
+          "model": "tabm",
+          "gini_train": 0.0648,
+          "gini_test": 0.0332,
+          "mae": 187802.11,
+          "rmse": 203298.92,
+          "cv_rmse": 1.0824,
+          "ae_ratio": 7436.716,
+          "gamma_deviance": -4515436.943944,
+          "n_params": 410364.0,
+          "training_time": 126.8
+        }
+      ],
+      "config": {
+        "seed": 42,
+        "n_tuning_trials": 30,
+        "cv_folds": 5,
+        "quick": false,
+        "architectures": [
+          "catboost",
+          "xgboost",
+          "cann",
+          "cann_gbm",
+          "ft_transformer",
+          "tabm",
+          "localglmnet",
+          "drn"
+        ],
+        "epochs": 300,
+        "patience": 30,
+        "batch_size": 512,
+        "n_ensemble": 3,
+        "catboost_iterations": 2000,
+        "mono_lambda": 0.1
+      },
+      "best_model": "xgboost",
+      "glm_gini": 0.19835532870019956,
+      "timestamp": "2026-06-22T21:39:24.767656",
+      "has_interpretability": false,
+      "has_dashboard": true
+    },
+    {
+      "run_id": "house_prices_8arch_interp",
+      "dataset": "house_prices",
+      "label": "v3 (interpretability)",
+      "tuned": false,
+      "models": [
+        {
+          "model": "xgboost",
+          "gini_train": 0.2212,
+          "gini_test": 0.2049,
+          "mae": 17203.89,
+          "rmse": 29715.99,
+          "cv_rmse": 0.1582,
+          "ae_ratio": 0.9985,
+          "gamma_deviance": -4.691965,
+          "n_params": 462.0,
+          "training_time": 0.4
+        },
+        {
+          "model": "stacked_ensemble",
+          "gini_train": 0.2212,
+          "gini_test": 0.2049,
+          "mae": 17203.89,
+          "rmse": 29715.99,
+          "cv_rmse": 0.1582,
+          "ae_ratio": 0.9985,
+          "gamma_deviance": -4.691965,
+          "n_params": 9.0,
+          "training_time": 0.0
+        },
+        {
+          "model": "catboost",
+          "gini_train": 0.2172,
+          "gini_test": 0.1996,
+          "mae": 29223.45,
+          "rmse": 42466.58,
+          "cv_rmse": 0.2261,
+          "ae_ratio": 1.1608,
+          "gamma_deviance": -14.947891,
+          "n_params": 499.0,
+          "training_time": 2.7
+        },
+        {
+          "model": "localglmnet",
+          "gini_train": 0.206,
+          "gini_test": 0.1991,
+          "mae": 23419.59,
+          "rmse": 41406.01,
+          "cv_rmse": 0.2204,
+          "ae_ratio": 0.9881,
+          "gamma_deviance": -7.820823,
+          "n_params": 22620.0,
+          "training_time": 6.3
+        },
+        {
+          "model": "drn",
+          "gini_train": 0.2021,
+          "gini_test": 0.1962,
+          "mae": 27927.62,
+          "rmse": 50086.19,
+          "cv_rmse": 0.2667,
+          "ae_ratio": 0.9813,
+          "gamma_deviance": -10.697358,
+          "n_params": 53010.0,
+          "training_time": 6.6
+        },
+        {
+          "model": "cann",
+          "gini_train": 0.2024,
+          "gini_test": 0.1941,
+          "mae": 24906.06,
+          "rmse": 40934.79,
+          "cv_rmse": 0.2179,
+          "ae_ratio": 1.0241,
+          "gamma_deviance": -9.638755,
+          "n_params": 52815.0,
+          "training_time": 6.5
+        },
+        {
+          "model": "cann_gbm",
+          "gini_train": 0.215,
+          "gini_test": 0.194,
+          "mae": 32932.26,
+          "rmse": 48574.52,
+          "cv_rmse": 0.2586,
+          "ae_ratio": 1.193,
+          "gamma_deviance": -20.046771,
+          "n_params": 52815.0,
+          "training_time": 5.8
+        },
+        {
+          "model": "ft_transformer",
+          "gini_train": 0.0593,
+          "gini_test": 0.0368,
+          "mae": 187771.09,
+          "rmse": 203270.26,
+          "cv_rmse": 1.0822,
+          "ae_ratio": 3337.2602,
+          "gamma_deviance": -2023550.196912,
+          "n_params": 483267.0,
+          "training_time": 340.8
+        },
+        {
+          "model": "tabm",
+          "gini_train": 0.0649,
+          "gini_test": 0.0331,
+          "mae": 187802.11,
+          "rmse": 203298.92,
+          "cv_rmse": 1.0824,
+          "ae_ratio": 7436.7159,
+          "gamma_deviance": -4515436.929884,
+          "n_params": 410364.0,
+          "training_time": 176.6
+        }
+      ],
+      "config": {
+        "seed": 42,
+        "n_tuning_trials": 30,
+        "cv_folds": 5,
+        "quick": false,
+        "architectures": [
+          "catboost",
+          "xgboost",
+          "cann",
+          "cann_gbm",
+          "ft_transformer",
+          "tabm",
+          "localglmnet",
+          "drn"
+        ],
+        "epochs": 300,
+        "patience": 30,
+        "batch_size": 512,
+        "n_ensemble": 3,
+        "catboost_iterations": 2000,
+        "mono_lambda": 0.1
+      },
+      "best_model": "xgboost",
+      "glm_gini": 0.19835532870019956,
+      "timestamp": "2026-06-29T20:45:12.755636",
+      "has_interpretability": true,
+      "has_dashboard": true,
+      "feature_importance": {
+        "catboost": {
+          "TotalSF": 0.0962863738175841,
+          "OverallQual": 0.0430441335525443,
+          "GrLivArea": 0.0429540466342487,
+          "YearRemodAdd": 0.0380829425094382,
+          "LotArea": 0.0299558890709282,
+          "KitchenQual": 0.0283623711800096,
+          "OverallCond": 0.0279401784174333,
+          "MSZoning": 0.0224204509764671,
+          "HouseAge": 0.0217102219490483,
+          "GarageCars": 0.0210774963635443,
+          "1stFlrSF": 0.0177018573042125,
+          "GarageArea": 0.0167283319231501,
+          "SaleCondition": 0.0128064863909697,
+          "CentralAir": 0.0123543062192682,
+          "YearBuilt": 0.0099445294133328,
+          "ExterQual": 0.0079957762260587,
+          "LotShape": 0.0062710555665336,
+          "2ndFlrSF": 0.0061533011361664,
+          "TotalBsmtSF": 0.0061256595777599,
+          "Heating": 0.0058973807185231,
+          "TotRmsAbvGrd": 0.0055160473121489,
+          "Foundation": 0.0054921592113503,
+          "BldgType": 0.0054525118221466,
+          "FullBath": 0.004621338428952,
+          "BedroomAbvGr": 0.0040027075125446,
+          "Street": 0.0027285930166932,
+          "RoofStyle": 0.0017120094213143,
+          "HouseStyle": 0.0,
+          "SaleType": 0.0,
+          "Neighborhood": 0.0
+        },
+        "xgboost": {
+          "TotalSF": 0.1382718533277511,
+          "OverallQual": 0.1028167977929115,
+          "GrLivArea": 0.0323018692433834,
+          "YearRemodAdd": 0.025436133146286,
+          "OverallCond": 0.0248036477714777,
+          "HouseAge": 0.0210618525743484,
+          "GarageCars": 0.0197018608450889,
+          "LotArea": 0.0187359452247619,
+          "YearBuilt": 0.0118903936818242,
+          "KitchenQual": 0.011459688656032,
+          "GarageArea": 0.0111553436145186,
+          "Neighborhood": 0.0097595667466521,
+          "MSZoning": 0.0097282510250806,
+          "SaleCondition": 0.0067738075740635,
+          "HouseStyle": 0.0066073457710444,
+          "2ndFlrSF": 0.0064764968119561,
+          "BldgType": 0.0060148821212351,
+          "1stFlrSF": 0.0059752957895398,
+          "TotalBsmtSF": 0.0056716874241828,
+          "ExterQual": 0.0054017202928662,
+          "BedroomAbvGr": 0.0053646401502192,
+          "CentralAir": 0.0036354013718664,
+          "FullBath": 0.0021380428224802,
+          "LotShape": 0.0020939586684107,
+          "TotRmsAbvGrd": 0.0020592471119016,
+          "SaleType": 0.001964981900528,
+          "Foundation": 0.0005980093847028,
+          "RoofStyle": 0.000574312347453,
+          "Heating": 0.0001287364138988,
+          "Street": 4.0004691982176155e-05
+        }
+      },
+      "localglmnet_coef_summary": {
+        "LotArea": {
+          "mean": 0.00029116507806480264,
+          "std": 0.00018470938045254772,
+          "sign_stability": 0.9835526315789473
+        },
+        "YearBuilt": {
+          "mean": 0.0003377418931643421,
+          "std": 0.00022958543608416572,
+          "sign_stability": 0.993421052631579
+        },
+        "YearRemodAdd": {
+          "mean": 0.0003082760148743421,
+          "std": 0.00027146391014318553,
+          "sign_stability": 0.9671052631578947
+        },
+        "TotalBsmtSF": {
+          "mean": 0.0002399646858782895,
+          "std": 0.00014637912067326056,
+          "sign_stability": 0.993421052631579
+        },
+        "1stFlrSF": {
+          "mean": 0.00023605656292105263,
+          "std": 0.00011710596914968956,
+          "sign_stability": 0.9967105263157895
+        },
+        "2ndFlrSF": {
+          "mean": -0.0002467354031171052,
+          "std": 0.0002453787777234178,
+          "sign_stability": 0.9572368421052632
+        },
+        "GrLivArea": {
+          "mean": -5.616365411680921e-05,
+          "std": 0.00012356392612193655,
+          "sign_stability": 0.7171052631578947
+        },
+        "FullBath": {
+          "mean": 0.00016927629749398024,
+          "std": 0.00029676512262861055,
+          "sign_stability": 0.8552631578947368
+        },
+        "BedroomAbvGr": {
+          "mean": -9.640116064309212e-05,
+          "std": 0.0001434711335160756,
+          "sign_stability": 0.7960526315789473
+        },
+        "TotRmsAbvGrd": {
+          "mean": -0.00011483775360694079,
+          "std": 0.00012001204619380791,
+          "sign_stability": 0.8355263157894737
+        },
+        "GarageCars": {
+          "mean": 0.00037363551479276314,
+          "std": 0.0004434997391430533,
+          "sign_stability": 0.9802631578947368
+        },
+        "GarageArea": {
+          "mean": 0.00027253380106710527,
+          "std": 0.00015118726783987002,
+          "sign_stability": 0.9901315789473685
+        },
+        "OverallQual": {
+          "mean": 0.00018482279830822368,
+          "std": 0.00012402960039551626,
+          "sign_stability": 0.9802631578947368
+        },
+        "OverallCond": {
+          "mean": 0.0002792200163157895,
+          "std": 0.0003281603359158919,
+          "sign_stability": 0.9868421052631579
+        },
+        "TotalSF": {
+          "mean": 0.00022738518577960525,
+          "std": 0.00014125829734968714,
+          "sign_stability": 0.993421052631579
+        },
+        "HouseAge": {
+          "mean": -0.00033398111906361846,
+          "std": 0.0002014629278918413,
+          "sign_stability": 1.0
+        },
+        "LotArea_raw": {
+          "mean": 3.759417155230263e-08,
+          "std": 2.3849000950922144e-08,
+          "sign_stability": 0.9835526315789473
+        },
+        "YearBuilt_raw": {
+          "mean": 1.1061610100157895e-05,
+          "std": 7.519305847361133e-06,
+          "sign_stability": 0.993421052631579
+        },
+        "YearRemodAdd_raw": {
+          "mean": 1.492743092493421e-05,
+          "std": 1.3144904659274574e-05,
+          "sign_stability": 0.9671052631578947
+        },
+        "TotalBsmtSF_raw": {
+          "mean": 5.48277725993421e-07,
+          "std": 3.3445091956372973e-07,
+          "sign_stability": 0.993421052631579
+        },
+        "1stFlrSF_raw": {
+          "mean": 6.212992758124999e-07,
+          "std": 3.0822211890162337e-07,
+          "sign_stability": 0.9967105263157895
+        },
+        "2ndFlrSF_raw": {
+          "mean": -5.686235095213816e-07,
+          "std": 5.654970544114991e-07,
+          "sign_stability": 0.9572368421052632
+        },
+        "GrLivArea_raw": {
+          "mean": -1.0749726719046052e-07,
+          "std": 2.3650143028059886e-07,
+          "sign_stability": 0.7171052631578947
+        },
+        "FullBath_raw": {
+          "mean": 0.0003078777779507895,
+          "std": 0.0005397529769549865,
+          "sign_stability": 0.8552631578947368
+        },
+        "BedroomAbvGr_raw": {
+          "mean": -0.00011807369236414474,
+          "std": 0.00017572575179869375,
+          "sign_stability": 0.7960526315789473
+        },
+        "TotRmsAbvGrd_raw": {
+          "mean": -7.041999916368421e-05,
+          "std": 7.359294228620575e-05,
+          "sign_stability": 0.8355263157894737
+        },
+        "GarageCars_raw": {
+          "mean": 0.0005016730062138158,
+          "std": 0.0005954783377458247,
+          "sign_stability": 0.9802631578947368
+        },
+        "GarageArea_raw": {
+          "mean": 1.2976349905526316e-06,
+          "std": 7.198589197757843e-07,
+          "sign_stability": 0.9901315789473685
+        },
+        "OverallQual_raw": {
+          "mean": 0.00013375171440789473,
+          "std": 8.975717171280061e-05,
+          "sign_stability": 0.9802631578947368
+        },
+        "OverallCond_raw": {
+          "mean": 0.0002500056042697368,
+          "std": 0.00029382536466772614,
+          "sign_stability": 0.9868421052631579
+        },
+        "TotalSF_raw": {
+          "mean": 2.768258744506579e-07,
+          "std": 1.7197229641593832e-07,
+          "sign_stability": 0.993421052631579
+        },
+        "HouseAge_raw": {
+          "mean": -1.091267894716217e-05,
+          "std": 6.5827082683586876e-06,
+          "sign_stability": 1.0
+        }
+      }
+    },
+    {
+      "run_id": "house_prices_baseline",
+      "dataset": "house_prices",
+      "label": "v1 (GBM baseline)",
+      "tuned": false,
+      "models": [
+        {
+          "model": "catboost",
+          "gini_train": 0.2203,
+          "gini_test": 0.2061,
+          "mae": 16868.04,
+          "rmse": 27062.87,
+          "cv_rmse": 0.1441,
+          "ae_ratio": 1.025,
+          "gamma_deviance": -4.476422,
+          "n_params": 1041.0,
+          "training_time": 4.4
+        },
+        {
+          "model": "xgboost",
+          "gini_train": 0.2212,
+          "gini_test": 0.2049,
+          "mae": 17203.89,
+          "rmse": 29715.99,
+          "cv_rmse": 0.1582,
+          "ae_ratio": 0.9985,
+          "gamma_deviance": -4.691965,
+          "n_params": 462.0,
+          "training_time": 0.3
+        },
+        {
+          "model": "stacked_ensemble",
+          "gini_train": 0.2212,
+          "gini_test": 0.2049,
+          "mae": 17203.89,
+          "rmse": 29715.99,
+          "cv_rmse": 0.1582,
+          "ae_ratio": 0.9985,
+          "gamma_deviance": -4.691965,
+          "n_params": 3.0,
+          "training_time": 0.0
+        }
+      ],
+      "config": {
+        "seed": 42,
+        "n_tuning_trials": 30,
+        "cv_folds": 5,
+        "quick": false,
+        "architectures": [
+          "catboost",
+          "xgboost"
+        ],
+        "epochs": 300,
+        "patience": 30,
+        "batch_size": 512,
+        "n_ensemble": 3,
+        "catboost_iterations": 2000,
+        "mono_lambda": 0.1
+      },
+      "best_model": "catboost",
+      "glm_gini": 0.009817159273634912,
+      "timestamp": "2026-05-27T22:08:09.831216",
+      "has_interpretability": false,
+      "has_dashboard": true
+    },
+    {
+      "run_id": "house_prices_tuned",
+      "dataset": "house_prices",
+      "label": "v4 (Optuna tuned)",
+      "tuned": true,
+      "models": [
+        {
+          "model": "xgboost",
+          "gini_train": 0.2209,
+          "gini_test": 0.2057,
+          "mae": 16548.67,
+          "rmse": 27629.22,
+          "cv_rmse": 0.1471,
+          "ae_ratio": 0.9966,
+          "gamma_deviance": -4.278027,
+          "n_params": 235.0,
+          "training_time": 0.2
+        },
+        {
+          "model": "stacked_ensemble",
+          "gini_train": 0.2209,
+          "gini_test": 0.2057,
+          "mae": 16548.67,
+          "rmse": 27629.22,
+          "cv_rmse": 0.1471,
+          "ae_ratio": 0.9966,
+          "gamma_deviance": -4.278027,
+          "n_params": 9.0,
+          "training_time": 0.0
+        },
+        {
+          "model": "localglmnet",
+          "gini_train": 0.206,
+          "gini_test": 0.1991,
+          "mae": 23417.52,
+          "rmse": 41360.29,
+          "cv_rmse": 0.2202,
+          "ae_ratio": 0.9883,
+          "gamma_deviance": -7.819595,
+          "n_params": 22620.0,
+          "training_time": 5.7
+        },
+        {
+          "model": "drn",
+          "gini_train": 0.2031,
+          "gini_test": 0.1962,
+          "mae": 46055.87,
+          "rmse": 73972.01,
+          "cv_rmse": 0.3938,
+          "ae_ratio": 0.8167,
+          "gamma_deviance": -19.339722,
+          "n_params": 21234.0,
+          "training_time": 5.7
+        },
+        {
+          "model": "cann",
+          "gini_train": 0.2024,
+          "gini_test": 0.1941,
+          "mae": 24900.9,
+          "rmse": 40932.74,
+          "cv_rmse": 0.2179,
+          "ae_ratio": 1.0241,
+          "gamma_deviance": -9.633887,
+          "n_params": 52815.0,
+          "training_time": 5.0
+        },
+        {
+          "model": "catboost",
+          "gini_train": 0.2175,
+          "gini_test": 0.19,
+          "mae": 35173.46,
+          "rmse": 50414.56,
+          "cv_rmse": 0.2684,
+          "ae_ratio": 1.2095,
+          "gamma_deviance": -34.027862,
+          "n_params": 446.0,
+          "training_time": 5.6
+        },
+        {
+          "model": "cann_gbm",
+          "gini_train": 0.2154,
+          "gini_test": 0.1834,
+          "mae": 38567.12,
+          "rmse": 55950.12,
+          "cv_rmse": 0.2979,
+          "ae_ratio": 1.2432,
+          "gamma_deviance": -40.212166,
+          "n_params": 52815.0,
+          "training_time": 4.5
+        },
+        {
+          "model": "tabm",
+          "gini_train": 0.1158,
+          "gini_test": 0.0781,
+          "mae": 185774.67,
+          "rmse": 201427.52,
+          "cv_rmse": 1.0724,
+          "ae_ratio": 91.5026,
+          "gamma_deviance": -52325.177327,
+          "n_params": 758250.0,
+          "training_time": 126.6
+        },
+        {
+          "model": "ft_transformer",
+          "gini_train": -0.0151,
+          "gini_test": -0.0305,
+          "mae": 145023.4,
+          "rmse": 164598.32,
+          "cv_rmse": 0.8763,
+          "ae_ratio": 4.3881,
+          "gamma_deviance": -1206.347849,
+          "n_params": 2066307.0,
+          "training_time": 612.4
+        }
+      ],
+      "config": {
+        "seed": 42,
+        "n_tuning_trials": 30,
+        "cv_folds": 5,
+        "quick": false,
+        "architectures": [
+          "catboost",
+          "xgboost",
+          "cann",
+          "cann_gbm",
+          "ft_transformer",
+          "tabm",
+          "localglmnet",
+          "drn"
+        ],
+        "epochs": 300,
+        "patience": 30,
+        "batch_size": 512,
+        "n_ensemble": 3,
+        "catboost_iterations": 2000,
+        "mono_lambda": 0.1
+      },
+      "best_model": "xgboost",
+      "glm_gini": 0.19835532870019956,
+      "timestamp": "2026-06-29T21:40:57.571231",
+      "has_interpretability": false,
+      "has_dashboard": true
+    }
+  ]
+}

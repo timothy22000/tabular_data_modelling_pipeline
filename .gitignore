@@ -16,10 +16,21 @@ data/*
 
 # Local artefacts from training / HF uploads (not part of the repo).
 catboost_info/
-allstate_training.log
-allstate_training.pid
+*_training.log
+*_training.pid
+hp_tuned.log
+hp_tuned.pid
+hp_interp.log
+hp_interp.pid
+bs_interp.log
+bs_interp.pid
 hf_dataset/
 hf_dataset_bike_sharing/
 hf_models_allstate/
 hf_models_bike_sharing/
 hf_models_house_prices/
+hf_models_house_prices_v3/
+hf_models_bike_sharing_v3/
+
+# Dashboard server PID file
+dashboard/server.pid
