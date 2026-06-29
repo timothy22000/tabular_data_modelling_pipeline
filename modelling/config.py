@@ -1,10 +1,44 @@
 """Configuration, setup, and CLI argument parsing for the DL pipeline."""
 from __future__ import annotations
 
-# Must be set BEFORE any imports to avoid OpenMP conflicts on macOS.
+# ---------------------------------------------------------------------------
+# OpenMP runtime mitigation (macOS).  MUST run before any numpy/torch/xgboost
+# imports below.
+#
+# WHY THIS IS HERE
+# ----------------
+# Apple-silicon macOS wheels ship multiple, unrelated OpenMP runtimes in
+# the same Python process:
+#   * XGBoost vendors its own libomp.dylib inside the wheel.
+#   * numpy / scipy use the OMP runtime bundled with OpenBLAS (or MKL).
+#   * CatBoost statically links yet another OMP copy.
+#
+# When two libomp instances are loaded simultaneously they do not share a
+# thread pool; nested parallel regions then race in undefined ways - most
+# commonly a silent segfault inside libxgboost during the first .fit().
+#
+# KMP_DUPLICATE_LIB_OK=TRUE only silences the Intel-OMP startup warning;
+# it does NOT prevent the crash.  The robust mitigation is OMP_NUM_THREADS=1,
+# which forces every OMP runtime in the process to a single thread and
+# bypasses the offending code path entirely.
+#
+# This is a macOS-only problem.  Linux runners (incl. our GitHub Actions
+# CI) link wheels against a single system libomp and never crash, so we
+# leave their threading untouched.
+#
+# OPT-OUT
+# -------
+# Both env vars use setdefault, so if you already exported either value
+# (e.g. `OMP_NUM_THREADS=4 python train.py`) your value wins.  A
+# conda-forge environment that aligns libomp across all packages can
+# safely run with OMP_NUM_THREADS > 1.
+# ---------------------------------------------------------------------------
 import os
+import platform
 
-os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
+os.environ.setdefault("KMP_DUPLICATE_LIB_OK", "TRUE")
+if platform.system() == "Darwin":
+    os.environ.setdefault("OMP_NUM_THREADS", "1")
 
 import argparse
 import json

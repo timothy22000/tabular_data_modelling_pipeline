@@ -289,6 +289,66 @@ python train.py --config configs/example_bike_sharing.py \
 python train.py --skip-interpretability ...
 ```
 
+## Troubleshooting
+
+### macOS arm64: silent segfault during XGBoost training
+
+**Symptom.** `python train.py` exits cleanly mid-XGBoost with no traceback;
+log truncates at "Training XGBoost..." or `Pool` allocation; sometimes
+`OMP: Error #179: Function pthread_mutex_init failed`.
+
+**Root cause.** Pip wheels on Apple Silicon ship multiple, unrelated
+OpenMP runtimes in the same process:
+
+| Library | OMP source |
+|---|---|
+| XGBoost wheel | vendored `libomp.dylib` next to `libxgboost.dylib` |
+| numpy / scipy | OpenBLAS-bundled OMP (or MKL OMP if installed) |
+| CatBoost | static-linked OMP in `_catboost.so` |
+
+When two libomp instances co-exist, they each maintain a separate thread
+pool. Nested parallel sections then race (libxgboost.dylib spawning a
+team while numpy is mid-OpenBLAS GEMM, for example), and the result is
+usually a `pthread_mutex_init` failure or a silent SIGSEGV.
+
+`KMP_DUPLICATE_LIB_OK=TRUE` only quietens the Intel-OMP warning - it
+does not prevent the crash.
+
+**Mitigation (automatic).** Since v0.1.0 the pipeline detects macOS and
+sets `OMP_NUM_THREADS=1` at import time before any numerical library is
+loaded (see [modelling/config.py](modelling/config.py)). This forces every
+OMP runtime in the process to single-threaded execution, which bypasses
+the contended code path entirely. Linux and Windows are unaffected.
+
+**Opt-out for advanced users.** The auto-set uses `setdefault`, so
+exporting the variable yourself wins:
+
+```bash
+# Use 4 OMP threads (only safe if you have a conda-forge env that aligns libomp)
+OMP_NUM_THREADS=4 python train.py ...
+```
+
+The truly correct fix is to align libomp across all packages. The
+cleanest way on macOS is a conda-forge environment:
+
+```bash
+conda create -n tabmodel python=3.12 -c conda-forge
+conda activate tabmodel
+conda install -c conda-forge libomp xgboost catboost numpy scipy
+pip install -e .
+```
+
+In a conda-forge env you can safely set `OMP_NUM_THREADS=$(sysctl -n hw.ncpu)`.
+
+### Other gotchas
+
+- **`tabm` import error.** If installing on Python ≥ 3.13, `pip install tabm`
+  may resolve to an older release. Either drop Python to 3.12 or `pip
+  install git+https://github.com/yandex-research/tabm`.
+- **CatBoost "Gamma loss is not supported".** Older CatBoost (<1.2) lacks
+  the Gamma loss enum. Pipeline maps `family="gamma"` to
+  `Tweedie:variance_power=1.99` as the closest valid approximation.
+
 ## Optional dependencies
 
 Install only what you need:
